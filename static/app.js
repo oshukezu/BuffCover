@@ -1,6 +1,6 @@
 import { DEFAULT_LAT, DEFAULT_LNG, DEFAULT_RADIUS, DEFAULT_ADDRESS } from './config.js';
 import { saveStoredCenter, saveStoredRadius, getStoredData } from './storage.js';
-import { parseMarkdownAddresses } from './parser.js';
+import { parseMarkdownAddresses, parseImportedFile } from './parser.js';
 import { fetchGeocodeSingle, fetchAnalyzeBuffer } from './api.js';
 import { 
     initMapInstance, 
@@ -52,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const importInsideCountEl = document.getElementById('import-inside-count');
     const importCoverageRateEl = document.getElementById('import-coverage-rate');
     const importCoverageRateFill = document.getElementById('import-coverage-rate-fill');
+    
+    const downloadScreenshotBtn = document.getElementById('download-screenshot-btn');
+    const mdPathInput = document.getElementById('md-path-input');
+    const importMdPathBtn = document.getElementById('import-md-path-btn');
 
     // 設定初始 UI 數值
     radiusSlider.value = currentRadius;
@@ -366,10 +370,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = function(evt) {
             const content = evt.target.result;
-            const parsedAddresses = parseMarkdownAddresses(content);
+            
+            // 取得檔案副檔名
+            const dotIdx = file.name.lastIndexOf('.');
+            const ext = dotIdx !== -1 ? file.name.substring(dotIdx + 1) : '';
+            
+            const parsedAddresses = parseImportedFile(content, ext);
             
             if (parsedAddresses.length === 0) {
-                showStatusMsg(importStatusMsg, "在 Markdown 檔案中未發現有效地址！", "error");
+                showStatusMsg(importStatusMsg, "在選取的檔案中未發現有效地址！", "error");
                 return;
             }
 
@@ -377,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
             queueImportAddresses(parsedAddresses);
         };
         reader.onerror = function() {
-            showStatusMsg(importStatusMsg, "讀取 Markdown 檔案失敗！", "error");
+            showStatusMsg(importStatusMsg, "讀取檔案失敗！", "error");
         };
         reader.readAsText(file);
         
@@ -398,6 +407,70 @@ document.addEventListener('DOMContentLoaded', () => {
     
     toggleOutsideCheckbox.addEventListener('change', () => {
         performAnalysis();
+    });
+    
+    // 載入本地電腦指定的絕對路徑檔案
+    importMdPathBtn.addEventListener('click', async () => {
+        const path = mdPathInput.value.trim();
+        if (!path) {
+            showStatusMsg(importStatusMsg, "請輸入本地檔案絕對路徑", "error");
+            return;
+        }
+
+        showStatusMsg(importStatusMsg, `正在向後端請求讀取本地檔案: ${path}...`, "info");
+        try {
+            const response = await fetch(`/api/read-local-md?path=${encodeURIComponent(path)}`);
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || "讀取檔案失敗");
+            }
+            const data = await response.json();
+            if (data.success && data.content) {
+                // 取得檔案副檔名以利智慧解析
+                const dotIdx = path.lastIndexOf('.');
+                const ext = dotIdx !== -1 ? path.substring(dotIdx + 1) : '';
+                
+                const parsedAddresses = parseImportedFile(data.content, ext);
+                if (parsedAddresses.length === 0) {
+                    showStatusMsg(importStatusMsg, "在該檔案中未發現有效地址！", "error");
+                    return;
+                }
+                batchAddressInput.value = parsedAddresses.join('\n');
+                queueImportAddresses(parsedAddresses);
+            } else {
+                throw new Error("讀取到的檔案內容為空");
+            }
+        } catch (error) {
+            console.error("讀取本地檔案失敗:", error);
+            showStatusMsg(importStatusMsg, `載入失敗: ${error.message}`, "error");
+        }
+    });
+
+    // 點擊截圖下載
+    downloadScreenshotBtn.addEventListener('click', () => {
+        showStatusMsg(importStatusMsg, "正在產生網頁截圖，請稍候...", "info");
+        
+        const container = document.getElementById('app-container');
+        html2canvas(container, {
+            useCORS: true,
+            allowTaint: false,
+            scale: 2, // 提升清晰度，適合 Retina 螢幕
+            backgroundColor: '#080C14' // 對應 CSS 的 --bg-base
+        }).then(canvas => {
+            try {
+                const link = document.createElement('a');
+                link.download = `GIS_Studio_Screenshot_${new Date().toISOString().slice(0,10)}_${Math.floor(Math.random()*1000)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showStatusMsg(importStatusMsg, "截圖下載完成！📸", "success");
+            } catch (err) {
+                console.error("產生圖片網址失敗，可能為 CORS 限制或畫布污染 (Tainted Canvas)：", err);
+                showStatusMsg(importStatusMsg, `截圖失敗: ${err.message}`, "error");
+            }
+        }).catch(err => {
+            console.error("html2canvas 轉換失敗:", err);
+            showStatusMsg(importStatusMsg, `截圖失敗: ${err.message}`, "error");
+        });
     });
     
     // 初始化執行首次分析與大小重新計算，保證載入時正常呈現

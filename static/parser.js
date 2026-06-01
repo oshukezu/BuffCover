@@ -38,3 +38,62 @@ export function parseMarkdownAddresses(text) {
     
     return addresses;
 }
+
+/**
+ * 智慧解析不同格式的檔案內容
+ * @param {string} content - 檔案文字內容
+ * @param {string} fileExtension - 檔案副檔名 (例如 'json', 'csv', 'md', 'txt' 等)
+ * @returns {Array<string>} 解析出來的地址陣列
+ */
+export function parseImportedFile(content, fileExtension) {
+    if (!content) return [];
+    
+    const ext = (fileExtension || '').toLowerCase().trim();
+    
+    // 1. JSON 格式解析
+    if (ext === 'json' || content.trim().startsWith('{') || content.trim().startsWith('[')) {
+        try {
+            const data = JSON.parse(content);
+            const list = [];
+            
+            // 遞迴搜尋所有符合地址特徵的字串
+            function extractStrings(obj) {
+                if (typeof obj === 'string') {
+                    if (obj.length >= 5 && /([市縣區鄉鎮路街號]|^[a-zA-Z0-9\s]+$)/.test(obj)) {
+                        list.push(obj.trim());
+                    }
+                } else if (Array.isArray(obj)) {
+                    obj.forEach(extractStrings);
+                } else if (typeof obj === 'object' && obj !== null) {
+                    Object.values(obj).forEach(extractStrings);
+                }
+            }
+            
+            extractStrings(data);
+            return list;
+        } catch (e) {
+            console.warn("JSON 解析失敗，降級為普通文字解析", e);
+        }
+    }
+    
+    // 2. CSV 格式解析
+    if (ext === 'csv') {
+        const lines = content.split('\n');
+        const list = [];
+        lines.forEach(line => {
+            if (!line.trim()) return;
+            // 依逗號或管線符分割
+            const cols = line.split(/[,|]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
+            cols.forEach(c => {
+                if (c.length >= 5 && /([市縣區鄉鎮路街號]|^[a-zA-Z0-9\s]+$)/.test(c)) {
+                    list.push(c);
+                }
+            });
+        });
+        return list;
+    }
+    
+    // 3. 預設 (Markdown 或 TXT) 格式解析
+    return parseMarkdownAddresses(content);
+}
+

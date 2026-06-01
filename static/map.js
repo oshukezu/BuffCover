@@ -34,7 +34,8 @@ export function initMapInstance(elementId, initialLat, initialLng, initialRadius
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         subdomains: 'abc',
-        maxZoom: 19
+        maxZoom: 19,
+        crossOrigin: 'anonymous'
     }).addTo(mapInstance);
     
     // 建立一個客製化中心標記 Icon (藍紫色發光外圈)

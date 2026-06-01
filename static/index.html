@@ -14,6 +14,9 @@
     <!-- 引入 Leaflet.js 地圖 CSS (使用 jsdelivr CDN 提升載入穩定度) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- 引入 html2canvas 實現前端網頁截圖下載 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
     <!-- 自訂 CSS -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -27,10 +30,11 @@
         <!-- 側邊控制面板 (玻璃帷幕風格) -->
         <aside id="sidebar-panel" class="control-panel">
             <div class="panel-header">
-                <div class="brand">
-                    <span class="icon">🌐</span>
-                    <span class="brand-text">GIS Studio</span>
-                </div>
+                <div class="brand" style="display: flex; width: 100%; align-items: center; gap: 8px;">
+                <span class="icon">🌐</span>
+                <span class="brand-text">GIS Studio</span>
+                <button id="download-screenshot-btn">下載截圖 📸</button>
+            </div>
                 <h1 id="main-title">環域分析涵蓋率工具</h1>
                 <p class="subtitle">輸入地址定位中心、匯入參考門牌，並調整滑桿來計算空間涵蓋率。</p>
             </div>
@@ -83,13 +87,31 @@
             <section class="import-group">
                 <div class="control-card">
                     <h2 class="card-title">匯入參考地址 (Batch Import)</h2>
+                    
+                    <!-- 📁 從電腦匯入檔案 (整合自訂絕對路徑與瀏覽選取，擴大格式支援) -->
+                    <div class="import-section-title">📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)</div>
+                    <div class="local-file-import-box">
+                        <div class="local-path-field">
+                            <label for="md-path-input" class="label">輸入本機檔案絕對路徑</label>
+                            <div class="input-with-button">
+                                <input type="text" id="md-path-input" placeholder="例如: /Users/username/data.md">
+                                <button id="import-md-path-btn" class="primary-btn">絕對路徑載入</button>
+                            </div>
+                        </div>
+                        <div class="browse-file-field">
+                            <span class="label">或直接從電腦選擇檔案：</span>
+                            <button id="import-md-btn" class="outline-btn">瀏覽檔案 📂</button>
+                            <input type="file" id="md-file-input" accept=".md,.txt,.csv,.json" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <!-- ✍️ 手動貼入地址 -->
+                    <div class="import-section-title">✍️ 手動貼入地址</div>
                     <div class="textarea-container">
                         <textarea id="batch-address-input" class="custom-textarea" rows="3" placeholder="請在此一行輸入一個地址..."></textarea>
                     </div>
                     <div class="import-action-buttons">
-                        <button id="import-custom-btn" class="secondary-btn">匯入地址</button>
-                        <button id="import-md-btn" class="outline-btn">匯入 Markdown 📄</button>
-                        <input type="file" id="md-file-input" accept=".md" style="display: none;">
+                        <button id="import-custom-btn" class="secondary-btn" style="width: 100%;">解析並匯入貼入的地址</button>
                     </div>
                     <div id="import-status-msg" class="status-msg"></div>
                     

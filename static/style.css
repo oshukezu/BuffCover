@@ -1028,3 +1028,136 @@ input[type="text"]:focus, .custom-textarea:focus {
 .leaflet-tile-container {
     filter: invert(90%) hue-rotate(180deg) brightness(85%) contrast(90%) !important;
 }
+
+/* ==========================================================================
+   V2.1 升級功能美化樣式 (下載截圖與本地 Markdown 載入)
+   ========================================================================== */
+
+#download-screenshot-btn {
+    margin-left: auto;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+    transition: var(--transition-smooth);
+}
+
+#download-screenshot-btn:hover {
+    background: var(--primary-gradient);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+#download-screenshot-btn:active {
+    transform: translateY(0);
+}
+
+.local-path-field {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    background: rgba(30, 41, 59, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: var(--transition-smooth);
+}
+
+.local-path-field:hover {
+    border-color: var(--border-hover);
+    background: rgba(30, 41, 59, 0.3);
+}
+
+.local-path-field .label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+#md-path-input {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+}
+
+#import-md-path-btn {
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+}
+
+/* ==========================================================================
+   V2.2 升級功能美化樣式 (整合電腦檔案匯入區)
+   ========================================================================== */
+
+.import-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-top: 14px;
+    margin-bottom: 8px;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.local-file-import-box {
+    background: rgba(30, 41, 59, 0.25);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 14px;
+    transition: var(--transition-smooth);
+}
+
+.local-file-import-box:hover {
+    border-color: var(--border-hover);
+    background: rgba(30, 41, 59, 0.35);
+}
+
+.local-file-import-box .local-path-field {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 12px;
+}
+
+.local-file-import-box .local-path-field:hover {
+    box-shadow: none;
+}
+
+.browse-file-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.browse-file-field .label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+#import-md-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    transition: var(--transition-smooth);
+}
+
+#import-md-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: var(--text-primary);
+}
+
+
