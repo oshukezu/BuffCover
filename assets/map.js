@@ -5,6 +5,7 @@ let centerMarker = null;
 let bufferCircle = null;
 let landmarkMarkers = [];
 let importedMarkers = [];
+let currentTileLayer = null;
 
 /**
  * 初始化地圖實例與基本圖層
@@ -30,11 +31,11 @@ export function initMapInstance(elementId, initialLat, initialLng, initialRadius
         attributionControl: true
     }).setView([initialLat, initialLng], 14);
     
-    // 載入 OpenStreetMap 官方圖磚 (最穩定的公共圖磚服務，保證不被 AdBlock 阻擋，在 CSS 中將其濾鏡反轉成深色模式)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        subdomains: 'abc',
-        maxZoom: 19,
+    // 預設載入曜石黑風格地圖 (CartoDB Dark Matter，截圖超乾淨)
+    currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20,
         crossOrigin: 'anonymous'
     }).addTo(mapInstance);
     
@@ -202,7 +203,8 @@ export function drawLandmarks(landmarks, showOutside) {
     landmarks.forEach(landmark => {
         const { name, category, lat, lng, description, distance, isInside } = landmark;
         
-        if (isInside || showOutside) {
+        // 地圖上僅繪製範圍內地標 (isInside 為 true)，範圍外地標完全不繪製，保持畫面乾淨
+        if (isInside) {
             const markerIcon = createLandmarkIcon(isInside);
             const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(mapInstance);
             
@@ -306,4 +308,53 @@ export function focusOnLocation(lat, lng, markerInstance) {
             mapInstance.invalidateSize();
         }, 100);
     }
+}
+
+/**
+ * 動態切換地圖底圖風格
+ * @param {string} styleName - 風格名稱，支援 'carto-dark' | 'osm-dark' | 'osm-light'
+ */
+export function switchMapStyle(styleName) {
+    if (!mapInstance) return;
+    
+    // 移除舊有圖層
+    if (currentTileLayer) {
+        mapInstance.removeLayer(currentTileLayer);
+    }
+    
+    const mapElement = document.getElementById('map');
+    
+    if (styleName === 'carto-dark') {
+        // 使用 CartoDB Dark Matter (無伺服器極簡黑，超乾淨底圖)
+        if (mapElement) mapElement.classList.remove('theme-osm-dark');
+        currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            crossOrigin: 'anonymous'
+        }).addTo(mapInstance);
+    } else if (styleName === 'osm-dark') {
+        // 使用 OSM 官方圖磚 + CSS 霓虹深色濾鏡
+        if (mapElement) mapElement.classList.add('theme-osm-dark');
+        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            subdomains: 'abc',
+            maxZoom: 19,
+            crossOrigin: 'anonymous'
+        }).addTo(mapInstance);
+    } else {
+        // 標準 OSM 地圖原色
+        if (mapElement) mapElement.classList.remove('theme-osm-dark');
+        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            subdomains: 'abc',
+            maxZoom: 19,
+            crossOrigin: 'anonymous'
+        }).addTo(mapInstance);
+    }
+    
+    // 重繪地圖大小以防閃爍
+    setTimeout(() => {
+        mapInstance.invalidateSize();
+    }, 50);
 }

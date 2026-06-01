@@ -269,32 +269,7 @@ def geocode_batch(request: BatchGeocodeRequest):
             
     return results
 
-@app.get("/api/read-local-md")
-def read_local_markdown(path: str = Query(..., description="本地 Markdown 檔案絕對路徑")):
-    """
-    讀取使用者在本地指定的 Markdown 檔案內容，繞過瀏覽器 Sandbox 限制
-    """
-    path_clean = path.strip()
-    if not path_clean:
-        raise HTTPException(status_code=400, detail="檔案路徑不能為空")
-        
-    # 安全防禦：確認檔案是否存在且為檔案
-    if not os.path.exists(path_clean):
-        raise HTTPException(status_code=404, detail="找不到指定的本地檔案")
-    if not os.path.isfile(path_clean):
-        raise HTTPException(status_code=400, detail="指定的路徑非檔案")
-        
-    # 副檔名限制：僅允許讀取文件格式
-    _, ext = os.path.splitext(path_clean.lower())
-    if ext not in [".md", ".txt", ".json", ".csv"]:
-        raise HTTPException(status_code=400, detail="僅支援匯入 .md, .txt, .json, .csv 等文字格式")
-        
-    try:
-        with open(path_clean, "r", encoding="utf-8", errors="ignore") as f:
-            content = f.read()
-        return {"success": True, "path": path_clean, "content": content}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"讀取檔案失敗: {str(e)}")
+
 
 # 提供首頁 index.html
 @app.get("/")

@@ -1024,8 +1024,8 @@ input[type="text"]:focus, .custom-textarea:focus {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 將明亮地圖圖磚反轉為科技感深色模式，同時不影響 Marker 與其他向量覆蓋物 */
-.leaflet-tile-container {
+/* 將明亮地圖圖磚反轉為科技感深色模式 (僅在套用 theme-osm-dark 時生效) */
+#map.theme-osm-dark .leaflet-tile-container {
     filter: invert(90%) hue-rotate(180deg) brightness(85%) contrast(90%) !important;
 }
 
@@ -1159,5 +1159,49 @@ input[type="text"]:focus, .custom-textarea:focus {
     border-color: rgba(255, 255, 255, 0.25);
     color: var(--text-primary);
 }
+
+/* ==========================================================================
+   V2.5 升級功能美化樣式 (地圖底圖風格選擇器)
+   ========================================================================== */
+
+.map-style-field {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+}
+
+.custom-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%2394A3B8' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 34px;
+}
+
+.custom-select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: rgba(15, 23, 42, 0.85);
+}
+
+.custom-select option {
+    background-color: var(--bg-surface-solid);
+    color: var(--text-primary);
+}
+
 
 

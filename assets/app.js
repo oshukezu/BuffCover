@@ -9,7 +9,8 @@ import {
     drawLandmarks, 
     drawImportedPoints,
     forceInvalidateSize,
-    focusOnLocation
+    focusOnLocation,
+    switchMapStyle
 } from './map.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -54,8 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const importCoverageRateFill = document.getElementById('import-coverage-rate-fill');
     
     const downloadScreenshotBtn = document.getElementById('download-screenshot-btn');
-    const mdPathInput = document.getElementById('md-path-input');
-    const importMdPathBtn = document.getElementById('import-md-path-btn');
+    const mapStyleSelect = document.getElementById('map-style-select');
 
     // 設定初始 UI 數值
     radiusSlider.value = currentRadius;
@@ -409,46 +409,15 @@ document.addEventListener('DOMContentLoaded', () => {
         performAnalysis();
     });
     
-    // 載入本地電腦指定的絕對路徑檔案
-    importMdPathBtn.addEventListener('click', async () => {
-        const path = mdPathInput.value.trim();
-        if (!path) {
-            showStatusMsg(importStatusMsg, "請輸入本地檔案絕對路徑", "error");
-            return;
-        }
-
-        showStatusMsg(importStatusMsg, `正在向後端請求讀取本地檔案: ${path}...`, "info");
-        try {
-            const response = await fetch(`/api/read-local-md?path=${encodeURIComponent(path)}`);
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.detail || "讀取檔案失敗");
-            }
-            const data = await response.json();
-            if (data.success && data.content) {
-                // 取得檔案副檔名以利智慧解析
-                const dotIdx = path.lastIndexOf('.');
-                const ext = dotIdx !== -1 ? path.substring(dotIdx + 1) : '';
-                
-                const parsedAddresses = parseImportedFile(data.content, ext);
-                if (parsedAddresses.length === 0) {
-                    showStatusMsg(importStatusMsg, "在該檔案中未發現有效地址！", "error");
-                    return;
-                }
-                batchAddressInput.value = parsedAddresses.join('\n');
-                queueImportAddresses(parsedAddresses);
-            } else {
-                throw new Error("讀取到的檔案內容為空");
-            }
-        } catch (error) {
-            console.error("讀取本地檔案失敗:", error);
-            // 判斷是否為無後端服務的靜態部署環境 (如 GitHub Pages)
-            if (error.message && (error.message.includes('fetch') || error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
-                showStatusMsg(importStatusMsg, "目前運行於 GitHub Pages 靜態環境，不支援讀取本機路徑。請點擊下方的「瀏覽檔案 📂」直接匯入！", "error");
-            } else {
-                showStatusMsg(importStatusMsg, `載入失敗: ${error.message}`, "error");
-            }
-        }
+    // 讀取與套用地圖底圖風格 (預設使用極簡曜石黑)
+    const storedStyle = localStorage.getItem('gis-map-style') || 'carto-dark';
+    mapStyleSelect.value = storedStyle;
+    
+    // 註冊地圖風格切換事件
+    mapStyleSelect.addEventListener('change', (e) => {
+        const selectedStyle = e.target.value;
+        switchMapStyle(selectedStyle);
+        localStorage.setItem('gis-map-style', selectedStyle);
     });
 
     // 點擊截圖下載
@@ -480,5 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 初始化執行首次分析與大小重新計算，保證載入時正常呈現
     performAnalysis();
+    switchMapStyle(storedStyle); // 載入預設/快取的底圖風格
     setTimeout(() => forceInvalidateSize(), 300);
 });

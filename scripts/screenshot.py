@@ -72,7 +72,12 @@ async def main():
         )
         print("半徑已調整至 2000m，地址涵蓋率已更新為 33.3%！")
         
-        # 額外等待 3 秒讓地圖動畫與地標圓圈完全就緒
+        # 4.5 切換地圖底圖風格為極簡曜石黑，以獲得最乾淨的截圖
+        print("切換地圖風格至極簡曜石黑 (CartoDB)...")
+        await page.select_option("#map-style-select", "carto-dark")
+        await page.evaluate("document.getElementById('map-style-select').dispatchEvent(new Event('change'))")
+        
+        # 額外等待 3 秒讓地圖動畫與曜石黑圖磚完全就緒
         await asyncio.sleep(3)
         
         # 5. 拍攝截圖
