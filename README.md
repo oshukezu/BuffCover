@@ -50,33 +50,3 @@ BuffCover/
    * 當調整半徑滑桿時，前端在本地即時完成 Haversine 球面距離計算。落入環域的點變為發光綠色 Marker，圓圈外的保持紅色。
 5. **相容性 Dark Mode 底圖**：
    * 載入 OpenStreetMap 官方圖磚（最穩定且絕不被 AdBlockers 阻擋），並在 CSS 中使用 `filter` 濾鏡反轉為深色主題，兼顧視覺質感與系統穩定度。
-
----
-
-## 🚀 啟動與使用指南
-
-### 1. 安裝環境與相依套件
-本專案使用 `uv` 管理 Python 虛擬環境：
-```bash
-# 進入專案目錄
-cd "/Users/oshukezu/Documents/Knowledge Vault/Codex/BuffCover"
-
-# 使用 uv 建立虛擬環境並安裝相依套件
-uv sync
-```
-
-### 2. 啟動後端服務
-```bash
-uv run uvicorn main:app --host 127.0.0.1 --port 8000
-```
-* 啟動後，請在瀏覽器中打開：[http://127.0.0.1:8000](http://127.0.0.1:8000)
-
-### 3. 自動化測試與截圖 (選用)
-本專案附帶自動化測試腳本，可用於確認地圖在 Headless 瀏覽器中的渲染是否正確：
-```bash
-# 安裝 Playwright 瀏覽器核心 (若尚未安裝)
-uv run playwright install chromium
-
-# 執行自動化測試與截圖 (會將最新畫面儲存為 screenshot.png)
-uv run python screenshot.py
-```
