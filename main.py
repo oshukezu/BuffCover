@@ -299,11 +299,38 @@ def read_local_markdown(path: str = Query(..., description="本地 Markdown 檔�
 # 提供首頁 index.html
 @app.get("/")
 def read_root():
-    return FileResponse("static/index.html")
+    return FileResponse("index.html")
 
-# 掛載靜態檔案路由
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# 靜態前端資源安全映射路由 (Safe Mapping) - 防止洩露本機 Python 與 Cache 檔案
+@app.get("/style.css")
+def get_css():
+    return FileResponse("style.css")
+
+@app.get("/app.js")
+def get_app():
+    return FileResponse("app.js")
+
+@app.get("/map.js")
+def get_map():
+    return FileResponse("map.js")
+
+@app.get("/config.js")
+def get_config():
+    return FileResponse("config.js")
+
+@app.get("/parser.js")
+def get_parser():
+    return FileResponse("parser.js")
+
+@app.get("/storage.js")
+def get_storage():
+    return FileResponse("storage.js")
+
+@app.get("/api.js")
+def get_api():
+    return FileResponse("api.js")
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+

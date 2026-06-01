@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>環域分析涵蓋率工具 - GIS Studio</title>
+    <meta name="description" content="一個現代化、反應流暢的台中市西屯區地圖環域分析工具。支援地址定位、多地址批次匯入、以及滑動半徑時的即時空間涵蓋率分析。">
+    
+    <!-- 引入 Google Fonts (Outfit 與 Noto Sans TC) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 引入 Leaflet.js 地圖 CSS (使用 jsdelivr CDN 提升載入穩定度) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- 引入 html2canvas 實現前端網頁截圖下載 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
+    <!-- 自訂 CSS -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="app-container" class="app-layout">
+        <!-- 地圖容器 -->
+        <main id="map-section" class="map-container">
+            <div id="map" class="map-element"></div>
+        </main>
+        
+        <!-- 側邊控制面板 (玻璃帷幕風格) -->
+        <aside id="sidebar-panel" class="control-panel">
+            <div class="panel-header">
+                <div class="brand" style="display: flex; width: 100%; align-items: center; gap: 8px;">
+                <span class="icon">🌐</span>
+                <span class="brand-text">GIS Studio</span>
+                <button id="download-screenshot-btn">下載截圖 📸</button>
+            </div>
+                <h1 id="main-title">環域分析涵蓋率工具</h1>
+                <p class="subtitle">輸入地址定位中心、匯入參考門牌，並調整滑桿來計算空間涵蓋率。</p>
+            </div>
+            
+            <!-- 控制區 -->
+            <section class="control-group">
+                <div class="control-card">
+                    <h2 class="card-title">環域中心與半徑設定</h2>
+                    
+                    <!-- 核心起始點地址定位 -->
+                    <div class="address-geocode-field">
+                        <label for="core-address-input" class="label">核心起始點地址</label>
+                        <div class="input-with-button">
+                            <input type="text" id="core-address-input" placeholder="輸入台中市西屯區地址..." value="台中市西屯區台灣大道三段99號">
+                            <button id="geocode-btn" class="primary-btn">定位</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 中心點資訊 -->
+                    <div class="coord-display">
+                        <div class="coord-field">
+                            <span class="label">中心緯度</span>
+                            <span id="center-lat" class="val">24.1622</span>
+                        </div>
+                        <div class="coord-field">
+                            <span class="label">中心經度</span>
+                            <span id="center-lng" class="val">120.6470</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 半徑調整滑桿 -->
+                    <div class="slider-field">
+                        <div class="slider-header">
+                            <label for="radius-slider" class="label">分析半徑</label>
+                            <span class="slider-value-container">
+                                <span id="radius-val" class="highlight">1000</span> 公尺
+                            </span>
+                        </div>
+                        <input type="range" id="radius-slider" min="100" max="5000" step="50" value="1000" class="custom-slider">
+                        <div class="slider-labels">
+                            <span>100m</span>
+                            <span>2.5km</span>
+                            <span>5km</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 大量參考點匯入 -->
+            <section class="import-group">
+                <div class="control-card">
+                    <h2 class="card-title">匯入參考地址 (Batch Import)</h2>
+                    
+                    <!-- 📁 從電腦匯入檔案 (整合自訂絕對路徑與瀏覽選取，擴大格式支援) -->
+                    <div class="import-section-title">📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)</div>
+                    <div class="local-file-import-box">
+                        <div class="local-path-field">
+                            <label for="md-path-input" class="label">輸入本機檔案絕對路徑</label>
+                            <div class="input-with-button">
+                                <input type="text" id="md-path-input" placeholder="例如: /Users/username/data.md">
+                                <button id="import-md-path-btn" class="primary-btn">絕對路徑載入</button>
+                            </div>
+                        </div>
+                        <div class="browse-file-field">
+                            <span class="label">或直接從電腦選擇檔案：</span>
+                            <button id="import-md-btn" class="outline-btn">瀏覽檔案 📂</button>
+                            <input type="file" id="md-file-input" accept=".md,.txt,.csv,.json" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <!-- ✍️ 手動貼入地址 -->
+                    <div class="import-section-title">✍️ 手動貼入地址</div>
+                    <div class="textarea-container">
+                        <textarea id="batch-address-input" class="custom-textarea" rows="3" placeholder="請在此一行輸入一個地址..."></textarea>
+                    </div>
+                    <div class="import-action-buttons">
+                        <button id="import-custom-btn" class="secondary-btn" style="width: 100%;">解析並匯入貼入的地址</button>
+                    </div>
+                    <div id="import-status-msg" class="status-msg"></div>
+                    
+                    <!-- Markdown 格式說明摺疊區塊 -->
+                    <details class="format-help-details">
+                        <summary>💡 支援的 Markdown 匯入格式規範</summary>
+                        <div class="format-help-content">
+                            <p>本系統能自動辨識並解析 Markdown 檔案中的地址，支援以下格式：</p>
+                            <ul>
+                                <li><strong>項目清單</strong>：<code>- 台中市西屯區...</code> 或 <code>* 台中市西屯區...</code></li>
+                                <li><strong>任務列表</strong>：<code>- [ ] 台中市西屯區...</code></li>
+                                <li><strong>編號清單</strong>：<code>1. 台中市西屯區...</code></li>
+                                <li><strong>Markdown 表格</strong>：會自動拆分 <code>|</code> 欄位並過濾出包含地址的欄位。</li>
+                                <li><strong>樣式標記</strong>：會自動過濾 <code>**粗體**</code>、<code>*斜體*</code> 等符號。</li>
+                            </ul>
+                            <p class="format-help-note">⚠️ 注意：過濾後的地址字串長度需大於等於 5 個字，且須包含「市、區、路、街、號」等特徵。</p>
+                        </div>
+                    </details>
+                    
+                    <!-- 地址解析佇列進度條 -->
+                    <div id="parse-progress-container" class="parse-progress-container" style="display: none;">
+                        <div class="progress-info-row">
+                            <span class="progress-label">地址解析進度</span>
+                            <span id="parse-progress-val" class="progress-val">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="parse-progress-fill" class="progress-bar-fill-cyan" style="width: 0%"></div>
+                        </div>
+                        <div id="parse-progress-detail" class="progress-detail">已解析 0 / 0 筆 (成功: 0, 失敗: 0)</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 統計摘要與涵蓋率 -->
+            <section class="stats-group">
+                <div class="stats-card">
+                    <h2 class="card-title">空間分析與涵蓋率</h2>
+                    
+                    <!-- 基礎資訊 -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span id="stat-area" class="stat-num">3.14</span>
+                            <span class="stat-label">環域面積 (km²)</span>
+                        </div>
+                        <div class="stat-item">
+                            <span id="stat-count" class="stat-num highlight-emerald">0</span>
+                            <span class="stat-label">預設地標在範圍內</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 地址涵蓋率空間交集指標 -->
+                    <div class="coverage-section">
+                        <div class="coverage-header">
+                            <span class="coverage-label">參考點地址涵蓋率</span>
+                            <span id="import-coverage-rate" class="coverage-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div id="import-coverage-rate-fill" class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="coverage-details">
+                            <span>涵蓋地址：<strong id="import-inside-count" class="text-emerald">0</strong> / <span id="import-total-count">0</span> 個</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 分析結果列表 -->
+            <section class="results-group">
+                <div class="results-header">
+                    <h2 class="card-title">預設地標分析結果</h2>
+                    <div class="filter-toggle">
+                        <input type="checkbox" id="toggle-outside" checked>
+                        <label for="toggle-outside">顯示範圍外</label>
+                    </div>
+                </div>
+                
+                <div id="landmarks-list" class="landmarks-list-container">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>載入地理資料中...</p>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="panel-footer">
+                <p>台中市西屯區環域分析應用程式 V2 &copy; 2026</p>
+            </footer>
+        </aside>
+    </div>
+    
+    <!-- 引入 Leaflet.js 地圖 JS (使用 jsdelivr CDN 提升載入穩定度) -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- 自訂 JS -->
+    <script type="module" src="./app.js"></script>
+</body>
+</html>
