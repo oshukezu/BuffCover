@@ -17,7 +17,7 @@ export const translations = {
         radius_label: "分析半徑",
         
         // 卡片 2 (批次匯入)
-        card_import_title: "匯入參考地址 (Batch Import)",
+        card_import_title: "匯入參考地址",
         local_file_import_label: "📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)",
         browse_file_label: "從本機選取並載入檔案：",
         browse_file_btn: "瀏覽檔案 📂",
