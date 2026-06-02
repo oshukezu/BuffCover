@@ -66,7 +66,7 @@ export const translations = {
         modal_dec_1_title: "🔒 隱私與本機安全保護",
         modal_dec_1_desc: "本工具為 100% 純前端離線沙盒運算。您匯入的任何 KML、GeoJSON 空間圖層數據與批次地址，皆完全留在您的瀏覽器本地進行質心與 Haversine 距離計算，<strong>絕不會上傳至任何外部伺服器或後端保存</strong>，確保極致的資訊安全與個人隱私。",
         modal_dec_2_title: "🌐 地圖與定位 API 來源",
-        modal_dec_2_desc: "本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民國內政部 TGOS 門牌地址定位 API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。",
+        modal_dec_2_desc: "本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民國內政部 TGOS 門牌地址定位 API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。（*請注意：TGOS 地址定位服務僅限台灣地區，海外之門牌地址暫不適用。）",
         modal_dec_3_title: "⚠️ 系統免責聲明",
         modal_dec_3_desc: "本工具提供之環域交集、涵蓋率與距離分析結果僅供參考，不具備法律與測量實質效力。實際空間交集情況，請以政府地政機關官方發布之登記或測量數據為準。",
 
@@ -146,7 +146,7 @@ export const translations = {
         modal_dec_1_title: "🔒 Privacy & Local Security",
         modal_dec_1_desc: "This tool runs 100% client-side inside browser sandbox. Your GIS vector layers and address lists are calculated entirely locally. <strong>No data will be uploaded to any external server</strong>, ensuring complete data security and privacy.",
         modal_dec_2_title: "🌐 Map & Geocoding Sources",
-        modal_dec_2_desc: "Map data is powered by OpenStreetMap. Address geocoding is integrated with Taiwan Ministry of Interior TGOS API (Lite) and Nominatim service, with automatic projection coordinate conversion from TWD97 to WGS84.",
+        modal_dec_2_desc: "Map data is powered by OpenStreetMap. Address geocoding is integrated with Taiwan Ministry of Interior TGOS API (Lite) and Nominatim service, with automatic projection coordinate conversion from TWD97 to WGS84. (*Note: TGOS geocoding service is only available for Taiwan area; overseas addresses are currently not supported.)",
         modal_dec_3_title: "⚠️ Disclaimer",
         modal_dec_3_desc: "The spatial buffer calculations, coverage rate, and centroid distance results are for general reference only and have no legal or official survey validity. Please consult public land offices for official boundary surveys.",
 
@@ -225,8 +225,8 @@ export const translations = {
         
         modal_dec_1_title: "🔒 プライバシーとローカルセキュリティ",
         modal_dec_1_desc: "このツールはブラウザのサンドボックス内で動作する 100% クライアントサイドのオフラインアプリです。インポートされたKML、GeoJSON空間データはローカルブラウザでのみ計算され、<strong>外部サーバーやバックエンドにアップロードされることはありません</strong>。",
-        modal_dec_2_title: "🌐 地図と住所検索ソース",
-        modal_dec_2_desc: "地図背景はOpenStreetMapを採用しています。住所ジオコーディングは、台湾内政部TGOS住所検索API（Lite）およびNominatimと統合されており、TWD97投影座標からWGS84への自動逆算も行われます。",
+        modal_dec_2_title: "🌐 地図データとジオコーディングAPI",
+        modal_dec_2_desc: "地図背景はOpenStreetMapを採用しています。住所ジオコーディングは、台湾内政部TGOS住所検索API（Lite）およびNominatimと統合されており、TWD97投影座標からWGS84への自動逆算も行われます。（*注意：TGOS住所検索サービスは台湾地域のみ対応しており、海外の住所は現在サポートされていません。）",
         modal_dec_3_title: "⚠️ 免責事項",
         modal_dec_3_desc: "このツールが提供するバッファ交差、カバー率、距離計算結果は参考情報であり、測量上または法的な効力はありません。公式な境界や測量データが必要な場合は、所管の土地登記所へご確認ください。",
 

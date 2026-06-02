@@ -186,8 +186,8 @@
             
             <!-- 分析結果列表 -->
             <details class="control-card results-group" open style="margin-bottom: 6px;">
-                <summary class="card-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; user-select: none;">
-                    <span data-i18n="card_results_title">空間圖層要素分析結果</span>
+                <summary style="display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; user-select: none;">
+                    <span class="card-title" data-i18n="card_results_title">空間圖層要素分析結果</span>
                     <div class="filter-toggle" onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 4px;">
                         <input type="checkbox" id="toggle-outside" checked>
                         <label for="toggle-outside" data-i18n="show_outside_label" style="cursor: pointer;">顯示範圍外</label>
@@ -210,7 +210,7 @@
             </details>
             
             <footer class="panel-footer" style="padding-top: 8px; margin-top: auto;">
-                <p>GIS Studio Buffer Analysis V2.9 &copy; 2026</p>
+                <p>Buffer Analysis V1.0 &copy; 2026 by J.J. Wang</p>
             </footer>
         </aside>
     </div>
@@ -269,7 +269,7 @@
                     </div>
                     <div class="declaration-item">
                         <strong data-i18n="modal_dec_2_title">🌐 地圖與定位 API 來源</strong>
-                        <p data-i18n="modal_dec_2_desc">本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民網路政部 TGOS 門牌地址定位 API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。</p>
+                        <p data-i18n="modal_dec_2_desc">本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民國內政部 TGOS 門牌地址定位 API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。（*請注意：TGOS 地址定位服務僅限台灣地區，海外之門牌地址暫不適用。）</p>
                     </div>
                     <div class="declaration-item">
                         <strong data-i18n="modal_dec_3_title">⚠️ 系統免責聲明</strong>

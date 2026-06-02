@@ -209,6 +209,33 @@ h1 {
     letter-spacing: 0.02em;
 }
 
+/* details summary 樣式重設，隱藏原生箭頭 */
+.control-card > summary::-webkit-details-marker,
+.stats-card > summary::-webkit-details-marker {
+    display: none;
+}
+.control-card > summary,
+.stats-card > summary {
+    list-style: none;
+    outline: none;
+}
+
+/* 自訂摺疊指示箭頭 */
+.card-title::before {
+    content: "▶";
+    display: inline-block;
+    font-size: 0.7rem;
+    margin-right: 8px;
+    transition: transform 0.2s ease;
+    color: var(--text-secondary);
+    vertical-align: middle;
+}
+
+details[open] > summary.card-title::before,
+details[open] > summary .card-title::before {
+    transform: rotate(90deg);
+}
+
 /* 座標顯示 */
 .coord-display {
     display: grid;
@@ -340,10 +367,6 @@ h1 {
 
 /* 結果列表區域 */
 .results-group {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
     margin-bottom: 10px;
 }
 
@@ -369,12 +392,11 @@ h1 {
 }
 
 .landmarks-list-container {
-    flex-grow: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: none;
+    max-height: 300px;
     padding-right: 4px;
 }
 
