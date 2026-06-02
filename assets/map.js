@@ -334,12 +334,12 @@ export function switchMapStyle(styleName) {
             crossOrigin: 'anonymous'
         }).addTo(mapInstance);
     } else if (styleName === 'carto-light') {
-        // 使用 CartoDB Positron (標準地圖淡色，高質感灰白底圖)
-        if (mapElement) mapElement.classList.remove('theme-osm-dark');
-        currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 20,
+        // 使用 OSM 標準地圖加上深色 CSS 濾鏡，形成淡雅深灰色底圖，與原色區隔
+        if (mapElement) mapElement.classList.add('theme-osm-dark');
+        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            subdomains: 'abc',
+            maxZoom: 19,
             crossOrigin: 'anonymous'
         }).addTo(mapInstance);
     } else {
