@@ -2,9 +2,10 @@
 
 export const translations = {
     zh: {
-        brand_title: "🌐 GIS Studio",
+        brand_title: "🌐 BuffCover",
         tutorial_btn: "說明 📖",
         screenshot_btn: "截圖 📸",
+        feedback_link: "問題與意見回饋 💬",
         
         // 卡片 1 (設定)
         card_setting_title: "環域中心與半徑設定",
@@ -57,11 +58,11 @@ export const translations = {
         modal_sec_declaration: "🛡️ 網站服務聲明",
         modal_close_btn: "我瞭解了，開始使用",
         
-        modal_step_1: "<strong>設定環域中心：</strong>在左側輸入核心地址點擊「定位」，或直接在地圖上任何位置點擊滑鼠，即可設定環域分析中心。中心點支援拖曳調整。",
-        modal_step_2: "<strong>匯入參考地址：</strong>展開「匯入參考地址 (Batch Import)」，可以透過貼入多行地址或直接瀏覽本機 CSV/JSON/MD 檔案，進行非同步批量門牌解析。",
-        modal_step_3: "<strong>載入 GIS 空間檔案：</strong>在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 <strong>GeoJSON (.geojson, .json)</strong> 或 <strong>KML (.kml)</strong> 圖層檔案。",
-        modal_step_4: "<strong>調整半徑即時分析：</strong>拖曳「分析半徑」滑桿，地圖上的點、線、面要素將會即時計算距離並改變顏色（綠色為範圍內，灰色為範圍外），右側清單將即時更新。",
-        modal_step_5: "<strong>地圖聯動與風格：</strong>點擊右側要素清單卡片可飛越 Focus 並展開氣泡泡泡；點選地圖左下角風格選單可隨時切換極簡曜石黑等三種地圖風格。",
+        modal_step_1: "設定環域中心：在左側輸入核心地址點擊「定位」，或直接在地圖上任何位置點擊滑鼠，即可設定環域分析中心。中心點支援拖曳調整。",
+        modal_step_2: "匯入參考地址：展開「匯入參考地址 (Batch Import)」，可以透過貼入多行地址或直接瀏覽本機 CSV/JSON/MD 檔案，進行非同步批量門牌解析。",
+        modal_step_3: "載入 GIS 空間檔案：在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 GeoJSON (.geojson, .json) 或 KML (.kml) 圖層檔案。",
+        modal_step_4: "調整半徑即時分析：拖曳「分析半徑」滑桿，地圖上的點、線、面要素將會即時計算距離並改變顏色（綠色為範圍內，灰色為範圍外），右側清單將即時更新。",
+        modal_step_5: "地圖聯動與風格：點擊右側要素清單卡片可飛越 Focus 並展開氣泡泡泡；點選地圖左下角風格選單可隨時切換極簡曜石黑等三種地圖風格。",
         
         modal_dec_1_title: "🔒 隱私與本機安全保護",
         modal_dec_1_desc: "本工具為 100% 純前端離線沙盒運算。您匯入的任何 KML、GeoJSON 空間圖層數據與批次地址，皆完全留在您的瀏覽器本地進行質心與 Haversine 距離計算，<strong>絕不會上傳至任何外部伺服器或後端保存</strong>，確保極致的資訊安全與個人隱私。",
@@ -82,9 +83,10 @@ export const translations = {
         status_parsing_aborted: "解析已由使用者中斷。"
     },
     en: {
-        brand_title: "🌐 GIS Studio",
+        brand_title: "🌐 BuffCover",
         tutorial_btn: "Guide 📖",
         screenshot_btn: "Capture 📸",
+        feedback_link: "Feedback & Issues 💬",
         
         // Card 1
         card_setting_title: "Buffer Center & Radius",
@@ -137,11 +139,11 @@ export const translations = {
         modal_sec_declaration: "🛡️ Terms & Declarations",
         modal_close_btn: "Got it, Let's Start",
         
-        modal_step_1: "<strong>Set Center:</strong> Enter address on the left and click 'Locate', or click anywhere directly on the map to set the analysis center. Drag center marker to adjust.",
-        modal_step_2: "<strong>Import Addresses:</strong> Expand 'Batch Import Addresses' to paste multi-line addresses or browse local CSV/JSON/MD files for async geocoding.",
-        modal_step_3: "<strong>Load GIS Layer:</strong> Click 'Load Layer 📂' inside 'Custom GIS Layer Features' to import your local <strong>GeoJSON (.geojson, .json)</strong> or <strong>KML (.kml)</strong> files.",
-        modal_step_4: "<strong>Real-time Analysis:</strong> Drag the radius slider. GIS points, lines, and polygons will calculate center distance on-the-fly and update colors (green inside, gray outside).",
-        modal_step_5: "<strong>Map Interactivity:</strong> Click card in list to FlyTo center and open details popup. Use style dropdown in map bottom-left to toggle 3 map basemaps.",
+        modal_step_1: "Set Center: Enter address on the left and click 'Locate', or click anywhere directly on the map to set the analysis center. Drag center marker to adjust.",
+        modal_step_2: "Import Addresses: Expand 'Batch Import Addresses' to paste multi-line addresses or browse local CSV/JSON/MD files for async geocoding.",
+        modal_step_3: "Load GIS Layer: Click 'Load Layer 📂' inside 'Custom GIS Layer Features' to import your local GeoJSON (.geojson, .json) or KML (.kml) files.",
+        modal_step_4: "Real-time Analysis: Drag the radius slider. GIS points, lines, and polygons will calculate center distance on-the-fly and update colors (green inside, gray outside).",
+        modal_step_5: "Map Interactivity: Click card in list to FlyTo center and open details popup. Use style dropdown in map bottom-left to toggle 3 map basemaps.",
         
         modal_dec_1_title: "🔒 Privacy & Local Security",
         modal_dec_1_desc: "This tool runs 100% client-side inside browser sandbox. Your GIS vector layers and address lists are calculated entirely locally. <strong>No data will be uploaded to any external server</strong>, ensuring complete data security and privacy.",
@@ -162,9 +164,10 @@ export const translations = {
         status_parsing_aborted: "Parsing has been cancelled by user."
     },
     ja: {
-        brand_title: "🌐 GIS Studio",
+        brand_title: "🌐 BuffCover",
         tutorial_btn: "ガイド 📖",
         screenshot_btn: "スクショ 📸",
+        feedback_link: "フィードバック・不具合報告 💬",
         
         // Card 1
         card_setting_title: "バッファ中心と半径設定",
@@ -217,11 +220,11 @@ export const translations = {
         modal_sec_declaration: "🛡️ サイトサービス宣言",
         modal_close_btn: "了解しました、利用を開始する",
         
-        modal_step_1: "<strong>中心の設定：</strong> 左側に住所を入力して「検索」をクリックするか、地図上の任意の場所をクリックして、分析バッファの中心を設定します。ドラッグでの調整も可能です。",
-        modal_step_2: "<strong>住所の一括インポート：</strong> 「参照住所の一括インポート」を展開し、複数行の住所を貼り付けるか、ローカルのCSV/JSON/MDファイルを参照して非同期に解析します。",
-        modal_step_3: "<strong>GISデータの読み込み：</strong> 「空間レイヤー地物分析結果」パネルの「レイヤーを読み込む 📂」をクリックし、ローカルの <strong>GeoJSON (.geojson, .json)</strong> または <strong>KML (.kml)</strong> データをインポートします。",
-        modal_step_4: "<strong>リアルタイム空間分析：</strong> 半径スライダーを調整すると、地物の重心と中心との距離をその場で計算し、マップ上の色を切り替えます（緑は範囲内、グレーは範囲外）。",
-        modal_step_5: "<strong>マップとの連動：</strong> 地物カードをクリックすると、その地物の重心へスムーズに移動し、ポップアップを開きます。マップ左下のスタイル選択で3つの背景地図を切り替えられます。",
+        modal_step_1: "中心の設定： 左側に住所を入力して「検索」をクリックするか、地図上の任意の場所をクリックして、分析バッファの中心を設定します。ドラッグでの調整も可能です。",
+        modal_step_2: "住所の一括インポート： 「参照住所の一括インポート」を展開し、複数行の住所を貼り付けるか、ローカルのCSV/JSON/MDファイルを参照して非同期に解析します。",
+        modal_step_3: "GISデータの読み込み： 「空間レイヤー地物分析結果」パネルの「レイヤーを読み込む 📂」をクリックし、ローカルの GeoJSON (.geojson, .json) または KML (.kml) データをインポートします。",
+        modal_step_4: "リアルタイム空間分析： 半径スライダーを調整すると、地物の重心と中心との距離をその場で計算し、マップ上の色を切り替えます（緑は範囲内、グレーは範囲外）。",
+        modal_step_5: "マップとの連動： 地物カードをクリックすると、その地物の重心へスムーズに移動し、ポップアップを開きます。マップ左下のスタイル選択で3つの背景地図を切り替えられます。",
         
         modal_dec_1_title: "🔒 プライバシーとローカルセキュリティ",
         modal_dec_1_desc: "このツールはブラウザのサンドボックス内で動作する 100% クライアントサイドのオフラインアプリです。インポートされたKML、GeoJSON空間データはローカルブラウザでのみ計算され、<strong>外部サーバーやバックエンドにアップロードされることはありません</strong>。",
@@ -276,6 +279,6 @@ export function applyTranslations(lang) {
     // 3. 特殊處理 html lang 屬性與 document title
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant-TW' : lang;
     const titleKey = 'brand_title';
-    const subTitle = lang === 'zh' ? '環域分析涵蓋率工具' : (lang === 'en' ? 'Buffer Coverage Tool' : 'バッファ分析ツール');
-    document.title = `${subTitle} - GIS Studio`;
+    const subTitle = lang === 'zh' ? '空間分析與涵蓋率工具' : (lang === 'en' ? 'Buffer Coverage & Analysis Tool' : 'バッファ分析とカバー率ツール');
+    document.title = `${subTitle} - BuffCover`;
 }

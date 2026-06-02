@@ -566,6 +566,16 @@ details[open] > summary .card-title::before {
     color: var(--text-muted);
 }
 
+.panel-footer a {
+    color: var(--text-muted);
+    text-decoration: underline;
+    transition: var(--transition-smooth);
+}
+
+.panel-footer a:hover {
+    color: var(--text-primary);
+}
+
 /* 中心標記樣式與動畫 */
 .custom-center-marker {
     background: transparent !important;

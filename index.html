@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>環域分析涵蓋率工具 - GIS Studio</title>
+    <title>BuffCover - 空間分析與涵蓋率工具</title>
     <meta name="description" content="一個現代化、反應流暢的台中市西屯區地圖環域分析工具。支援地址定位、多地址批次匯入、以及滑動半徑時的即時空間涵蓋率分析。">
     
     <!-- 引入 Google Fonts (Outfit 與 Noto Sans TC) -->
@@ -46,7 +46,7 @@
         <aside id="sidebar-panel" class="control-panel">
             <div class="panel-header" style="margin-bottom: 8px;">
                 <div class="brand" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px;">
-                    <span class="brand-text" data-i18n="brand_title" style="font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">🌐 GIS Studio</span>
+                    <span class="brand-text" data-i18n="brand_title" style="font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">🌐 BuffCover</span>
                     <div style="display: flex; gap: 4px; align-items: center;">
                         <select id="lang-select" class="custom-select-floating" style="padding: 2px 20px 2px 6px; font-size: 0.7rem; background-position: right 4px center; background-size: 10px; margin: 0; min-height: 0;">
                             <option value="zh">中文</option>
@@ -210,7 +210,10 @@
             </details>
             
             <footer class="panel-footer" style="padding-top: 8px; margin-top: auto;">
-                <p>Buffer Analysis V1.0 &copy; 2026 by J.J. Wang</p>
+                <p>BuffCover V1.0 &copy; 2026 by J.J. Wang</p>
+                <p style="margin-top: 4px; font-size: 0.65rem;">
+                    <a href="https://github.com/oshukezu" target="_blank" data-i18n="feedback_link" style="color: var(--text-muted); text-decoration: underline; transition: var(--transition-smooth);">問題與意見回饋 💬</a>
+                </p>
             </footer>
         </aside>
     </div>
@@ -229,31 +232,31 @@
                         <li>
                             <span class="step-num">1</span>
                             <div data-i18n="modal_step_1">
-                                <strong>設定環域中心：</strong>在左側輸入核心地址點擊「定位」，或直接在地圖上任何位置點擊滑鼠，即可設定環域分析中心。中心點支援拖曳調整。
+                                設定環域中心：在左側輸入核心地址點擊「定位」，或直接在地圖上任何位置點擊滑鼠，即可設定環域分析中心。中心點支援拖曳調整。
                             </div>
                         </li>
                         <li>
                             <span class="step-num">2</span>
                             <div data-i18n="modal_step_2">
-                                <strong>匯入參考地址：</strong>展開「匯入參考地址 (Batch Import)」，可以透過貼入多行地址或直接瀏覽本機 CSV/JSON/MD 檔案，進行非同步批量門牌解析。
+                                匯入參考地址：展開「匯入參考地址 (Batch Import)」，可以透過貼入多行地址或直接瀏覽本機 CSV/JSON/MD 檔案，進行非同步批量門牌解析。
                             </div>
                         </li>
                         <li>
                             <span class="step-num">3</span>
                             <div data-i18n="modal_step_3">
-                                <strong>載入 GIS 空間檔案：</strong>在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 <strong>GeoJSON (.geojson, .json)</strong> 或 <strong>KML (.kml)</strong> 圖層檔案。
+                                載入 GIS 空間檔案：在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 GeoJSON (.geojson, .json) 或 KML (.kml) 圖層檔案。
                             </div>
                         </li>
                         <li>
                             <span class="step-num">4</span>
                             <div data-i18n="modal_step_4">
-                                <strong>調整半徑即時分析：</strong>拖曳「分析半徑」滑桿，地圖上的點、線、面要素將會即時計算距離並改變顏色（綠色為範圍內，灰色為範圍外），右側清單將即時更新。
+                                調整半徑即時分析：拖曳「分析半徑」滑桿，地圖上的點、線、面要素將會即時計算距離並改變顏色（綠色為範圍內，灰色為範圍外），右側清單將即時更新。
                             </div>
                         </li>
                         <li>
                             <span class="step-num">5</span>
                             <div data-i18n="modal_step_5">
-                                <strong>地圖聯動與風格：</strong>點擊右側要素清單卡片可飛越 Focus 並展開氣泡泡泡；點選地圖左下角風格選單可隨時切換極簡曜石黑等三種地圖風格。
+                                地圖聯動與風格：點擊右側要素清單卡片可飛越 Focus 並展開氣泡泡泡；點選地圖左下角風格選單可隨時切換極簡曜石黑等三種地圖風格。
                             </div>
                         </li>
                     </ul>
