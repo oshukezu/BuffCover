@@ -544,6 +544,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // 即時多語重繪地圖 Popup 與側邊欄要素清單
             updateImportedPointsCoverage();
             performGisAnalysis();
+            
+            // 同步更新行動端抽屜按鈕文字
+            const togglePanelBtn = document.getElementById('toggle-panel-btn');
+            const controlPanel = document.getElementById('sidebar-panel');
+            if (togglePanelBtn && controlPanel) {
+                const isCollapsed = controlPanel.classList.contains('collapsed');
+                if (isCollapsed) {
+                    togglePanelBtn.textContent = currentLang === 'zh' ? '展開 ▲' : (currentLang === 'en' ? 'Expand ▲' : '展開 ▲');
+                } else {
+                    togglePanelBtn.textContent = currentLang === 'zh' ? '收起 ▼' : (currentLang === 'en' ? 'Collapse ▼' : '収縮 ▼');
+                }
+            }
         });
     }
 
@@ -636,4 +648,26 @@ document.addEventListener('DOMContentLoaded', () => {
     performGisAnalysis();
     switchMapStyle(storedStyle); // 載入預設/快取的底圖風格
     setTimeout(() => forceInvalidateSize(), 300);
+    
+    // 綁定行動端面板摺疊/展開切換 (Bottom Sheet 抽屜效果)
+    const togglePanelBtn = document.getElementById('toggle-panel-btn');
+    const controlPanel = document.getElementById('sidebar-panel');
+    const appContainer = document.getElementById('app-container');
+
+    if (togglePanelBtn && controlPanel && appContainer) {
+        togglePanelBtn.addEventListener('click', () => {
+            const isCollapsed = controlPanel.classList.toggle('collapsed');
+            appContainer.classList.toggle('panel-collapsed', isCollapsed);
+            
+            // 依語系更新按鈕文字
+            if (isCollapsed) {
+                togglePanelBtn.textContent = currentLang === 'zh' ? '展開 ▲' : (currentLang === 'en' ? 'Expand ▲' : '展開 ▲');
+            } else {
+                togglePanelBtn.textContent = currentLang === 'zh' ? '收起 ▼' : (currentLang === 'en' ? 'Collapse ▼' : '収縮 ▼');
+            }
+            
+            // 當高度改變時，地圖需要重新適應容器大小，避免破圖
+            setTimeout(() => forceInvalidateSize(), 350);
+        });
+    }
 });

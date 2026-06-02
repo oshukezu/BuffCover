@@ -82,11 +82,13 @@ export function initMapInstance(elementId, initialLat, initialLng, initialRadius
         onClickCallback(position.lat, position.lng);
     });
     
-    mapInstance.on('click', (e) => {
+    // 觸控設備防誤觸優化：若為觸控設備，地圖空白處改為雙擊（dblclick）觸發變更中心，防範平移地圖時誤觸
+    const clickEventName = L.Browser.touch ? 'dblclick' : 'click';
+    mapInstance.on(clickEventName, (e) => {
         const position = e.latlng;
         centerMarker.setLatLng(position);
         bufferCircle.setLatLng(position);
-        mapInstance.invalidateSize(); // 點擊時，重新校正地圖大小以防破圖
+        mapInstance.invalidateSize(); // 點擊/雙擊時，重新校正地圖大小以防破圖
         onClickCallback(position.lat, position.lng);
     });
 

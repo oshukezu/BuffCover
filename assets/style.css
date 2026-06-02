@@ -49,10 +49,44 @@ body {
     width: 100vw;
 }
 
+/* 桌面版預設隱藏行動端收合按鈕 */
+.mobile-only-btn {
+    display: none !important;
+}
+
 @media (max-width: 900px) {
     .app-layout {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 450px;
+        transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* 當行動端收合控制台時，讓地圖高度極大化 */
+    .app-layout.panel-collapsed {
+        grid-template-rows: 1fr 52px !important;
+    }
+    
+    .control-panel {
+        height: auto;
+        max-height: 450px;
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .control-panel.collapsed {
+        max-height: 52px !important;
+        overflow: hidden !important;
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+    }
+    
+    .mobile-only-btn {
+        display: inline-block !important;
+    }
+    
+    /* 手機版頂部按鈕觸控優化 */
+    .panel-header .brand {
+        flex-wrap: wrap;
+        gap: 8px !important;
     }
 }
 
@@ -141,6 +175,7 @@ body {
     flex-direction: column;
     height: 100vh;
     overflow-y: auto;
+    overscroll-behavior-y: contain; /* 防止行動端滾動溢出傳導給 body，避免下拉重新整理或橡皮筋回彈 */
     z-index: 1000;
     box-shadow: var(--shadow-lg);
     box-sizing: border-box;
