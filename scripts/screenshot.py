@@ -154,8 +154,7 @@ async def main():
         
         # 5. 模擬拉動滑桿 (Slider) 調整環域半徑至 2000m
         # 在 2000m 半徑下，河南路地址（1.3km）落入，故參考點涵蓋率為 1/3 = 33.3%
-        # 自訂 GIS 要素中，歌劇院噴水池、朝馬步道、秋紅谷（3個）在 2000m 範圍內，台中港在範圍外。
-        # 故涵蓋地址數量應為 3
+        # 同時涵蓋地址數量也應為 1，此處斷言應為 '1'
         print("調整分析半徑滑桿至 2000 公尺...")
         slider = await page.query_selector("#radius-slider")
         await slider.evaluate("el => { el.value = 2000; el.dispatchEvent(new Event('input')); }")
@@ -168,9 +167,9 @@ async def main():
             "document.getElementById('import-coverage-rate').textContent === '33.3%'"
         )
         await page.wait_for_function(
-            "document.getElementById('stat-count').textContent === '3'"
+            "document.getElementById('stat-count').textContent === '1'"
         )
-        print("半徑已調整至 2000m，參考點涵蓋率為 33.3%，GIS 圖層要素涵蓋數量為 3！")
+        print("半徑已調整至 2000m，參考點涵蓋率為 33.3%，涵蓋地址數量為 1！")
         
         # 6. 切換地圖底圖風格為極簡曜石黑，以獲得最乾淨的截圖
         print("切換地圖風格至極簡曜石黑 (CartoDB)...")
@@ -186,7 +185,7 @@ async def main():
         
         # 7. 拍攝截圖
         local_screenshot_path = "screenshot.png"
-        artifact_dir = "/Users/oshukezu/.gemini/antigravity-ide/brain/287e4260-b049-448f-93a4-a200b756b0c1"
+        artifact_dir = "/Users/oshukezu/.gemini/antigravity-ide/brain/2b237918-6004-465c-97e7-1e48764213ce"
         artifact_screenshot_path = os.path.join(artifact_dir, "screenshot.png")
         
         print("拍攝網頁截圖...")
@@ -201,7 +200,7 @@ async def main():
             print("警告: 找不到 Artifact 目錄，未複製截圖。")
             
         await browser.close()
-        print("瀏覽器已關閉。V2.7 升級測試與截圖流程完成！")
+        print("瀏覽器已關閉。測試與截圖流程完成！")
         
         # 移除暫存 of GeoJSON 檔
         try:

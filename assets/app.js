@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAddress = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
             coreAddressInput.value = currentAddress;
             saveStoredCenter(lat, lng, currentAddress);
+            updateImportedPointsCoverage();
             performGisAnalysis();
         }
     );
@@ -189,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             importInsideCountEl.textContent = "0";
             importCoverageRateEl.textContent = "0%";
             importCoverageRateFill.style.width = "0%";
+            statCountEl.textContent = "0"; // 涵蓋地址數量同步歸零
             return;
         }
 
@@ -208,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         importInsideCountEl.textContent = insideCount;
         importCoverageRateEl.textContent = `${coverageRate.toFixed(1)}%`;
         importCoverageRateFill.style.width = `${coverageRate}%`;
+        statCountEl.textContent = insideCount; // 核心修正：涵蓋地址數量等同涵蓋地址的結果
     }
 
     // 批次地址非同步佇列解析
@@ -310,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!gisGeoJson || !gisGeoJson.features || gisGeoJson.features.length === 0) {
             // 還沒有載入 GIS 資料
-            statCountEl.textContent = "0";
             landmarksList.innerHTML = `
                 <div class="empty-state">
                     <p data-i18n="landmarks_empty">${dict.landmarks_empty}</p>
@@ -331,9 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
             jsHaversine,
             formatDistance
         );
-
-        // 更新「涵蓋地址數量」UI 標籤 (為落入環域的幾何要素數量)
-        statCountEl.textContent = insideFeatures.length;
 
         // 收集所有需要列出渲染的 features (如果顯示範圍外，則包含全部 features，否則僅包含範圍內)
         let renderFeatures = [];
@@ -633,6 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // 初始化執行首次分析與大小重新計算，保證載入時正常呈現
+    updateImportedPointsCoverage();
     performGisAnalysis();
     switchMapStyle(storedStyle); // 載入預設/快取的底圖風格
     setTimeout(() => forceInvalidateSize(), 300);

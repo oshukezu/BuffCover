@@ -118,7 +118,7 @@ export const translations = {
         // Card 3
         card_stats_title: "Spatial Analysis & Coverage",
         stat_area_label: "Buffer Area (km²)",
-        stat_count_label: "Covered Features",
+        stat_count_label: "Covered Address Count",
         coverage_rate_label: "Ref Points Coverage Rate",
         covered_points_label: "Covered Points: ",
         points_unit: " pt(s)",
@@ -196,9 +196,9 @@ export const translations = {
         `,
         
         // Card 3
-        card_stats_title: "空間分析とカバー率",
+        card_stats_title: "空間分析と統計",
         stat_area_label: "バッファ面積 (km²)",
-        stat_count_label: "カバーされた地物数",
+        stat_count_label: "カバーされた参照住所数",
         coverage_rate_label: "参照点カバー率",
         covered_points_label: "カバーされた住所：",
         points_unit: " 個",
