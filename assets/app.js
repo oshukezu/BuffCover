@@ -670,4 +670,39 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => forceInvalidateSize(), 350);
         });
     }
+
+    // 綁定失敗原因說明 Modal 彈窗事件 (V2.9)
+    const failReasonBtn = document.getElementById('fail-reason-btn');
+    const failReasonModal = document.getElementById('fail-reason-modal');
+    const failModalCloseX = document.getElementById('fail-modal-close-x');
+    const failModalCloseBtn = document.getElementById('fail-modal-close-btn');
+
+    function openFailModal() {
+        if (failReasonModal) {
+            failReasonModal.style.display = 'flex';
+        }
+    }
+
+    function closeFailModal() {
+        if (failReasonModal) {
+            failReasonModal.style.display = 'none';
+        }
+    }
+
+    if (failReasonBtn) {
+        failReasonBtn.addEventListener('click', openFailModal);
+    }
+    if (failModalCloseX) {
+        failModalCloseX.addEventListener('click', closeFailModal);
+    }
+    if (failModalCloseBtn) {
+        failModalCloseBtn.addEventListener('click', closeFailModal);
+    }
+    if (failReasonModal) {
+        failReasonModal.addEventListener('click', (e) => {
+            if (e.target === failReasonModal) {
+                closeFailModal();
+            }
+        });
+    }
 });

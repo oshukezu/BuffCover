@@ -107,7 +107,7 @@
             
             <!-- 大量參考點匯入 -->
             <section class="import-group">
-                <details class="control-card" id="import-collapsible-card">
+                <details class="control-card" id="import-collapsible-card" open>
                     <summary class="card-title" data-i18n="card_import_title" style="cursor: pointer; user-select: none;">匯入參考地址 (Batch Import)</summary>
                     
                     <!-- 📁 從電腦匯入檔案 -->
@@ -148,7 +148,10 @@
                             <div id="parse-progress-fill" class="progress-bar-fill-cyan" style="width: 0%"></div>
                         </div>
                         <div id="parse-progress-detail" class="progress-detail"></div>
-                        <button id="stop-parse-btn" class="secondary-btn" style="margin-top: 6px; width: 100%; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop ⏹️</button>
+                        <div class="progress-action-row" style="display: flex; gap: 6px; margin-top: 6px;">
+                            <button id="stop-parse-btn" class="secondary-btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop ⏹️</button>
+                            <button id="fail-reason-btn" class="outline-btn" data-i18n="fail_reason_btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem;">失敗原因 ❓</button>
+                        </div>
                     </div>
                 </details>
             </section>
@@ -284,6 +287,52 @@
             </div>
             <div class="modal-footer">
                 <button id="modal-close-btn" class="primary-btn" data-i18n="modal_close_btn" style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 600;">我瞭解了，開始使用</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 地址解析失敗原因說明 Modal -->
+    <div id="fail-reason-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 data-i18n="fail_modal_title">❓ 地址解析失敗可能原因</h2>
+                <button id="fail-modal-close-x" class="modal-close-x">&times;</button>
+            </div>
+            <div class="modal-body" style="font-size: 0.82rem; line-height: 1.5;">
+                <p data-i18n="fail_modal_desc" style="margin-bottom: 12px; color: var(--text-secondary);">在進行批量門牌地址解析時，若出現解析失敗，可能為以下常見原因所致：</p>
+                <ul class="tutorial-steps" style="gap: 10px;">
+                    <li style="align-items: flex-start; gap: 8px;">
+                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">1</span>
+                        <div>
+                            <strong data-i18n="fail_reason_1_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">門牌歷史變更或過舊</strong>
+                            <span data-i18n="fail_reason_1_desc" style="color: var(--text-secondary);">地址可能為舊式門牌或已因行政區重劃、道路更名而失效，導致定位系統無法匹配最新資料。</span>
+                        </div>
+                    </li>
+                    <li style="align-items: flex-start; gap: 8px;">
+                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">2</span>
+                        <div>
+                            <strong data-i18n="fail_reason_2_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">地址書寫格式錯誤</strong>
+                            <span data-i18n="fail_reason_2_desc" style="color: var(--text-secondary);">地址字串中含有過多贅字、錯別字，或遺漏了關鍵的縣市名稱，或寫法不合常規（如「五段」寫成「5段」等）。</span>
+                        </div>
+                    </li>
+                    <li style="align-items: flex-start; gap: 8px;">
+                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">3</span>
+                        <div>
+                            <strong data-i18n="fail_reason_3_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">定位 API 服務限制</strong>
+                            <span data-i18n="fail_reason_3_desc" style="color: var(--text-secondary);">TGOS 地址編碼服務主要僅限解析「台灣地區」之門牌，海外地區地址、非標準建物名、或虛擬地標無法直接以此服務轉換。</span>
+                        </div>
+                    </li>
+                    <li style="align-items: flex-start; gap: 8px;">
+                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">4</span>
+                        <div>
+                            <strong data-i18n="fail_reason_4_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">網路請求速率限制</strong>
+                            <span data-i18n="fail_reason_4_desc" style="color: var(--text-secondary);">為了遵守 Nominatim 與定位服務的請求防護限制，批次解析非快取地址時有冷卻時間，請求過快可能觸發限流。</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="padding-top: 10px;">
+                <button id="fail-modal-close-btn" class="primary-btn" data-i18n="fail_modal_close" style="width: 100%; padding: 10px; font-size: 0.85rem; font-weight: 600;">關閉</button>
             </div>
         </div>
     </div>

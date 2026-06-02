@@ -80,7 +80,20 @@ export const translations = {
         map_ref_address: "匯入參考地址",
         map_fallback_addr: "找不到精確門牌，已退化定位至",
         
-        status_parsing_aborted: "解析已由使用者中斷。"
+        status_parsing_aborted: "解析已由使用者中斷。",
+        
+        fail_reason_btn: "失敗原因 ❓",
+        fail_modal_title: "❓ 地址解析失敗可能原因",
+        fail_modal_desc: "在進行批量門牌地址解析時，若出現解析失敗，可能為以下常見原因所致：",
+        fail_reason_1_title: "門牌歷史變更或過舊",
+        fail_reason_1_desc: "地址可能為舊式門牌或已因行政區重劃、道路更名而失效，導致定位系統無法匹配最新資料。",
+        fail_reason_2_title: "地址書寫格式錯誤",
+        fail_reason_2_desc: "地址字串中含有過多贅字、錯別字，或遺漏了關鍵的縣市名稱，或寫法不合常規（如「五段」寫成「5段」等）。",
+        fail_reason_3_title: "定位 API 服務限制",
+        fail_reason_3_desc: "TGOS 地址編碼服務主要僅限解析「台灣地區」之門牌，海外地區地址、非標準建物名、或虛擬地標無法直接以此服務轉換。",
+        fail_reason_4_title: "網路請求速率限制",
+        fail_reason_4_desc: "為了遵守 Nominatim 與定位服務的請求防護限制，批次解析非快取地址時有冷卻時間，請求過快可能觸發限流。",
+        fail_modal_close: "關閉"
     },
     en: {
         brand_title: "🌐 BuffCover",
@@ -161,7 +174,20 @@ export const translations = {
         map_ref_address: "Imported Ref Address",
         map_fallback_addr: "Address precise match failed. Fallback to",
         
-        status_parsing_aborted: "Parsing has been cancelled by user."
+        status_parsing_aborted: "Parsing has been cancelled by user.",
+        
+        fail_reason_btn: "Fail Reason ❓",
+        fail_modal_title: "❓ Possible Geocoding Failures",
+        fail_modal_desc: "If address geocoding fails during batch import, it might be due to the following reasons:",
+        fail_reason_1_title: "Historic or Outdated Doorplate",
+        fail_reason_1_desc: "The address might be an outdated doorplate or deactivated due to rezoning or road renaming, making it mismatch with official land databases.",
+        fail_reason_2_title: "Incorrect Address Formats",
+        fail_reason_2_desc: "The address string contains typo, noise, or lacks critical city/district names, or violates naming conventions (e.g. 'Sec. 5' written as 'Sec 5').",
+        fail_reason_3_title: "API Regional Restrictions",
+        fail_reason_3_desc: "TGOS geocoding service is strictly limited to Taiwan region. Overseas addresses, non-standard building names, or virtual landmarks cannot be parsed.",
+        fail_reason_4_title: "Rate Limit Enforcement",
+        fail_reason_4_desc: "To respect Nominatim and geocoding usage policies, batch parsing non-cached addresses has cool-down intervals; too rapid queries may trigger rate limits.",
+        fail_modal_close: "Close"
     },
     ja: {
         brand_title: "🌐 BuffCover",
@@ -242,7 +268,20 @@ export const translations = {
         map_ref_address: "インポート住所",
         map_fallback_addr: "正確な住所が見つからないため、位置を退避しました：",
         
-        status_parsing_aborted: "住所の解析処理がユーザーによって中断されました。"
+        status_parsing_aborted: "住所の解析処理がユーザーによって中断されました。",
+        
+        fail_reason_btn: "失敗の原因 ❓",
+        fail_modal_title: "❓ 住所解析失敗の主な原因",
+        fail_modal_desc: "住所一括インポートの解析で失敗が発生した場合、以下の原因が考えられます：",
+        fail_reason_1_title: "番地の歴史的変更や古い住所",
+        fail_reason_1_desc: "住所が古い番地であるか、区画整理や道路改名により無効になっているため、最新の地籍データと一致しない可能性があります。",
+        fail_reason_2_title: "住所の書式エラー",
+        fail_reason_2_desc: "住所の文字列に誤字・脱字が多い、必要な市区町村名が抜けている、または規格外の書き方（例：「五段」を「5段」と書くなど）をしている。",
+        fail_reason_3_title: "API の地域制限",
+        fail_reason_3_desc: "TGOS住所検索サービスは台湾地域のみ対応しています。海外の住所、非標準の建物名、仮想のランドマークは直接解析できません。",
+        fail_reason_4_title: "レートリミット（速度制限）",
+        fail_reason_4_desc: "NominatimおよびジオコーディングAPIの利用規約を遵守するため、非キャッシュ住所の解析には待機時間があり、短時間での大量リクエストは制限されます。",
+        fail_modal_close: "閉じる"
     }
 };
 
