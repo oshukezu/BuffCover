@@ -411,14 +411,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 讀取與套用地圖底圖風格 (預設使用極簡曜石黑)
     const storedStyle = localStorage.getItem('gis-map-style') || 'carto-dark';
-    mapStyleSelect.value = storedStyle;
-    
-    // 註冊地圖風格切換事件
-    mapStyleSelect.addEventListener('change', (e) => {
-        const selectedStyle = e.target.value;
-        switchMapStyle(selectedStyle);
-        localStorage.setItem('gis-map-style', selectedStyle);
-    });
+    if (mapStyleSelect) {
+        mapStyleSelect.value = storedStyle;
+        
+        // 註冊地圖風格切換事件
+        mapStyleSelect.addEventListener('change', (e) => {
+            const selectedStyle = e.target.value;
+            switchMapStyle(selectedStyle);
+            localStorage.setItem('gis-map-style', selectedStyle);
+        });
+    }
 
     // 點擊截圖下載
     downloadScreenshotBtn.addEventListener('click', () => {

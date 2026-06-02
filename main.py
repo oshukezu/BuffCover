@@ -197,6 +197,11 @@ class AnalyzeResult(BaseModel):
 class BatchGeocodeRequest(BaseModel):
     addresses: List[str]
 
+class CacheAddressRequest(BaseModel):
+    address: str
+    lat: float
+    lng: float
+
 @app.get("/api/analyze", response_model=AnalyzeResult)
 def analyze_buffer(
     lat: float = Query(..., description="中心點緯度", ge=-90.0, le=90.0),
@@ -268,6 +273,22 @@ def geocode_batch(request: BatchGeocodeRequest):
             time.sleep(1.0)
             
     return results
+
+@app.post("/api/cache-address")
+def cache_address(request: CacheAddressRequest):
+    """
+    新增或更新地址座標快取 API (由前端定位成功後回傳同步)
+    """
+    address_stripped = request.address.strip()
+    if not address_stripped:
+        raise HTTPException(status_code=400, detail="地址不可為空")
+        
+    ADDRESS_CACHE[address_stripped] = {
+        "lat": request.lat,
+        "lng": request.lng
+    }
+    save_cache()
+    return {"success": True, "message": "快取同步成功"}
 
 
 

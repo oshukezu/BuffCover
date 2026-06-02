@@ -42,6 +42,8 @@ async def main():
             "台中市西屯區工業區一路2號"         # 距離歌劇院約 3.6 公里
         ]
         address_text = "\n".join(test_addresses)
+        print("展開匯入參考地址卡片...")
+        await page.evaluate("document.getElementById('import-collapsible-card').setAttribute('open', '')")
         print(f"在批次匯入框中輸入 3 個測試地址:\n{address_text}")
         await page.fill("#batch-address-input", address_text)
         
@@ -76,6 +78,10 @@ async def main():
         print("切換地圖風格至極簡曜石黑 (CartoDB)...")
         await page.select_option("#map-style-select", "carto-dark")
         await page.evaluate("document.getElementById('map-style-select').dispatchEvent(new Event('change'))")
+        
+        # 收合「匯入參考地址」摺疊卡片，使截圖展現最清爽的一頁高整合畫面
+        print("收合匯入參考地址卡片...")
+        await page.evaluate("document.getElementById('import-collapsible-card').removeAttribute('open')")
         
         # 額外等待 3 秒讓地圖動畫與曜石黑圖磚完全就緒
         await asyncio.sleep(3)

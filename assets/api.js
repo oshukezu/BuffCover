@@ -16,22 +16,135 @@ function localHaversine(lat1, lon1, lat2, lon2) {
 }
 
 /**
- * 請求單一地址地理編碼 (優先請求 FastAPI 後端快取，若失敗或處於純靜態託管則自動向 OSM Nominatim 公用 API 請求)
+ * TWD97 TM2 坐標反算為 WGS84 經緯度
+ */
+function twd97_to_wgs84(x, y) {
+    const a = 6378137.0;
+    const b = 6356752.314245;
+    const lon0 = 121 * Math.PI / 180;
+    const k0 = 0.9999;
+    const dx = 250000;
+    
+    const dy = y;
+    const dx_proj = x - dx;
+    
+    const e = Math.sqrt(1 - Math.pow(b / a, 2));
+    const e2 = Math.pow(e, 2) / (1 - Math.pow(e, 2));
+    const M = dy / k0;
+    
+    const mu = M / (a * (1 - Math.pow(e, 2)/4 - 3*Math.pow(e, 4)/64 - 5*Math.pow(e, 6)/256));
+    const e1 = (1 - Math.sqrt(1 - Math.pow(e, 2))) / (1 + Math.sqrt(1 - Math.pow(e, 2)));
+    
+    const J1 = (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32);
+    const J2 = (21 * Math.pow(e1, 2) / 16 - 55 * Math.pow(e1, 4) / 32);
+    const J3 = (151 * Math.pow(e1, 3) / 96);
+    
+    const fp = mu + J1 * Math.sin(2 * mu) + J2 * Math.sin(4 * mu) + J3 * Math.sin(6 * mu);
+    
+    const C1 = e2 * Math.pow(Math.cos(fp), 2);
+    const T1 = Math.pow(Math.tan(fp), 2);
+    const R1 = a * (1 - Math.pow(e, 2)) / Math.pow(1 - Math.pow(e, 2) * Math.pow(Math.sin(fp), 2), 1.5);
+    const N1 = a / Math.sqrt(1 - Math.pow(e, 2) * Math.pow(Math.sin(fp), 2));
+    const D = dx_proj / (N1 * k0);
+    
+    const Q1 = D - (1 + 2 * T1 + C1) * Math.pow(D, 3) / 6;
+    const Q2 = (5 - 2 * C1 + 28 * T1 - 3 * Math.pow(C1, 2) + 8 * T1 * C1 + 24 * Math.pow(T1, 2)) * Math.pow(D, 5) / 120;
+    const Q3 = fp - (N1 * Math.tan(fp) / R1) * (Math.pow(D, 2) / 2 - (5 + 3 * T1 + 10 * C1 - 4 * Math.pow(C1, 2) - 9 * e2) * Math.pow(D, 4) / 24 + (61 + 90 * T1 + 298 * C1 + 45 * Math.pow(T1, 2) - 252 * e2 - 3 * Math.pow(C1, 2)) * Math.pow(D, 6) / 720);
+    
+    const lat = Q3 * 180 / Math.PI;
+    const lng = (lon0 + (Q1 + Q2) / Math.cos(fp)) * 180 / Math.PI;
+    
+    return { lat, lng };
+}
+
+/**
+ * 透過 TGOS.TGLocateService 進行地址定位 (保證與 OSM WGS84 坐標一致)
+ */
+function tgosGeocodePromise(address) {
+    return new Promise((resolve, reject) => {
+        if (typeof TGOS === 'undefined' || !TGOS.TGLocateService) {
+            return reject(new Error("TGOS SDK 未載入"));
+        }
+        
+        try {
+            const locator = new TGOS.TGLocateService();
+            // 優先嘗試 locateWGS84
+            const locateFn = locator.locateWGS84 ? locator.locateWGS84.bind(locator) : locator.locateTWD97.bind(locator);
+            const isWGS84Direct = !!locator.locateWGS84;
+            
+            locateFn({ address: address }, (result, status) => {
+                if (status === TGOS.TGLocatorStatus.OK && result && result.length > 0) {
+                    const loc = result[0].geometry.location;
+                    let lat = loc.y;
+                    let lng = loc.x;
+                    
+                    // 座標一致性檢查：若 X 大於 180，說明 TGOS 給的是 TWD97 座標，進行轉換
+                    if (lng > 180) {
+                        const wgs84 = twd97_to_wgs84(lng, lat);
+                        lat = wgs84.lat;
+                        lng = wgs84.lng;
+                    }
+                    
+                    resolve({
+                        address: address,
+                        lat: lat,
+                        lng: lng,
+                        success: true,
+                        cached: false
+                    });
+                } else {
+                    reject(new Error(`TGOS 定位無有效結果，狀態: ${status}`));
+                }
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
+/**
+ * 請求單一地址地理編碼 (優先請求 FastAPI 後端快取，若未命中則在前端利用 TGOS 定位並同步至後端，最後退化為 OSM Nominatim)
  * @param {string} address - 門牌地址
  * @returns {Promise<object>} 解析結果物件，包含 lat, lng, success, cached
  */
 export async function fetchGeocodeSingle(address) {
+    // 1. 優先嘗試請求本地後端 API 快取
     try {
-        // 1. 優先嘗試請求本地後端 API
         const response = await fetch(`/api/geocode?address=${encodeURIComponent(address)}`);
         if (response.ok) {
-            return await response.json();
+            const cacheResult = await response.json();
+            if (cacheResult && cacheResult.success) {
+                return cacheResult;
+            }
         }
     } catch (e) {
-        console.warn("無法連接本地後端服務，自動退化為純前端公用 Nominatim 定位Fallback機制:", e);
+        console.warn("後端連線失敗，改用前端即時定位流程:", e);
     }
     
-    // 2. 後端不可用時，直接請求 OSM Nominatim 公用 API
+    // 2. 後端未命中或不可用，優先嘗試 TGOS 定位並非同步寫回後端快取
+    if (typeof TGOS !== 'undefined') {
+        try {
+            const tgosResult = await tgosGeocodePromise(address);
+            if (tgosResult && tgosResult.success) {
+                // 非同步將結果同步回後端快取，供下次快速查詢
+                fetch('/api/cache-address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: address,
+                        lat: tgosResult.lat,
+                        lng: tgosResult.lng
+                    })
+                }).catch(err => console.warn("同步寫入後端快取失敗:", err));
+                
+                return tgosResult;
+            }
+        } catch (tgosErr) {
+            console.warn(`TGOS 定位失敗，將 Fallback 至 OSM: ${tgosErr.message}`);
+        }
+    }
+    
+    // 3. TGOS 失敗或未載入時，退化為 OSM Nominatim 公用 API
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
     const response = await fetch(url);
     if (!response.ok) {
@@ -45,7 +158,7 @@ export async function fetchGeocodeSingle(address) {
             lat: parseFloat(resData[0].lat),
             lng: parseFloat(resData[0].lon),
             success: true,
-            cached: false // 純前端不支援本地持久化快取
+            cached: false
         };
     } else {
         // 如果直接定位失敗，嘗試模糊退化定位（僅搜尋路段）
