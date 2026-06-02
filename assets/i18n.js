@@ -10,7 +10,7 @@ export const translations = {
         // 卡片 1 (設定)
         card_setting_title: "環域中心與半徑設定",
         core_address_label: "核心起始點地址",
-        core_address_placeholder: "輸入台中市西屯區地址...",
+        core_address_placeholder: "請輸入地址",
         geocode_btn: "定位",
         center_lat_label: "中心緯度",
         center_lng_label: "中心經度",
@@ -91,7 +91,7 @@ export const translations = {
         // Card 1
         card_setting_title: "Buffer Center & Radius",
         core_address_label: "Core Center Address",
-        core_address_placeholder: "Enter address in Xitun Taichung...",
+        core_address_placeholder: "Please enter address",
         geocode_btn: "Locate",
         center_lat_label: "Latitude",
         center_lng_label: "Longitude",
@@ -172,7 +172,7 @@ export const translations = {
         // Card 1
         card_setting_title: "バッファ中心と半径設定",
         core_address_label: "中心起点住所",
-        core_address_placeholder: "台中市西屯区の住所を入力...",
+        core_address_placeholder: "住所を入力してください",
         geocode_btn: "検索",
         center_lat_label: "中心緯度",
         center_lng_label: "中心経度",
