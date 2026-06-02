@@ -45,7 +45,7 @@ export const translations = {
         points_unit: " 個",
         
         // 卡片 4 (圖層)
-        card_results_title: "空間圖層要素分析結果",
+        card_results_title: "其他圖層參考",
         show_outside_label: "顯示範圍外",
         gis_layer_import_title: "匯入 GIS 圖層 (.geojson, .kml)",
         gis_import_btn: "載入圖層 📂",
@@ -139,7 +139,7 @@ export const translations = {
         points_unit: " pt(s)",
         
         // Card 4
-        card_results_title: "Custom GIS Layer Features",
+        card_results_title: "Other Reference Layers",
         show_outside_label: "Show Outside",
         gis_layer_import_title: "Import GIS Layer (.geojson, .kml)",
         gis_import_btn: "Load Layer 📂",
@@ -233,7 +233,7 @@ export const translations = {
         points_unit: " 個",
         
         // Card 4
-        card_results_title: "空間レイヤー地物分析結果",
+        card_results_title: "その他レイヤー参照",
         show_outside_label: "範囲外を表示",
         gis_layer_import_title: "GISレイヤーをインポート (.geojson, .kml)",
         gis_import_btn: "レイヤーを読み込む 📂",
