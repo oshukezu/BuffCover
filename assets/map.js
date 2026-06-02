@@ -1,9 +1,10 @@
-// Leaflet 地圖操作與 Marker 繪製模組
+import { getCookie } from './storage.js';
+import { translations } from './i18n.js';
 
 let mapInstance = null;
 let centerMarker = null;
 let bufferCircle = null;
-let landmarkMarkers = [];
+let gisLayerInstance = null;
 let importedMarkers = [];
 let currentTileLayer = null;
 
@@ -143,12 +144,12 @@ export function setBufferRadius(radius) {
 }
 
 /**
- * 清除地圖上現存的地標 Marker
+ * 清除地圖上現存的 GIS 圖層
  */
-export function clearLandmarkMarkers() {
-    if (mapInstance) {
-        landmarkMarkers.forEach(marker => mapInstance.removeLayer(marker));
-        landmarkMarkers = [];
+export function clearGisLayer() {
+    if (mapInstance && gisLayerInstance) {
+        mapInstance.removeLayer(gisLayerInstance);
+        gisLayerInstance = null;
     }
 }
 
@@ -163,65 +164,206 @@ export function clearImportedMarkers() {
 }
 
 /**
- * 建立地標客製化 Marker Icon
- * @param {boolean} isInside - 是否在環域範圍內
+ * 計算 GeoJSON 幾何物件的質心
+ * @param {object} geometry - GeoJSON 幾何物件
+ * @returns {object|null} {lat, lng} 格式的質心座標，若不支援則回傳 null
  */
-function createLandmarkIcon(isInside) {
-    const color = isInside ? '#10B981' : '#64748B'; 
-    const glowClass = isInside ? 'marker-pulse-glow' : '';
-    const htmlContent = `
-        <div style="position: relative; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">
-            <div class="${glowClass}" style="
-                position: absolute;
-                width: 12px;
-                height: 12px;
-                background-color: ${color};
-                border: 2px solid #ffffff;
-                border-radius: 50%;
-                box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
-                z-index: 2;
-            "></div>
-        </div>
-    `;
+export function getCentroid(geometry) {
+    if (!geometry || !geometry.type || !geometry.coordinates) return null;
     
-    return L.divIcon({
-        html: htmlContent,
-        className: 'custom-landmark-marker',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-    });
+    const type = geometry.type;
+    const coords = geometry.coordinates;
+    
+    if (type === 'Point') {
+        return { lat: coords[1], lng: coords[0] };
+    }
+    
+    if (type === 'LineString') {
+        let sumLat = 0;
+        let sumLng = 0;
+        const len = coords.length;
+        if (len === 0) return null;
+        for (let i = 0; i < len; i++) {
+            sumLng += coords[i][0];
+            sumLat += coords[i][1];
+        }
+        return { lat: sumLat / len, lng: sumLng / len };
+    }
+    
+    if (type === 'Polygon') {
+        // 通常取第一層外環即可
+        const ring = coords[0];
+        if (!ring || ring.length === 0) return null;
+        let sumLat = 0;
+        let sumLng = 0;
+        const len = ring.length;
+        for (let i = 0; i < len; i++) {
+            sumLng += ring[i][0];
+            sumLat += ring[i][1];
+        }
+        return { lat: sumLat / len, lng: sumLng / len };
+    }
+    
+    if (type === 'MultiPoint') {
+        if (coords.length === 0) return null;
+        let sumLat = 0;
+        let sumLng = 0;
+        const len = coords.length;
+        for (let i = 0; i < len; i++) {
+            sumLng += coords[i][0];
+            sumLat += coords[i][1];
+        }
+        return { lat: sumLat / len, lng: sumLng / len };
+    }
+
+    if (type === 'MultiLineString') {
+        let sumLat = 0;
+        let sumLng = 0;
+        let count = 0;
+        for (let i = 0; i < coords.length; i++) {
+            const line = coords[i];
+            for (let j = 0; j < line.length; j++) {
+                sumLng += line[j][0];
+                sumLat += line[j][1];
+                count++;
+            }
+        }
+        if (count === 0) return null;
+        return { lat: sumLat / count, lng: sumLng / count };
+    }
+
+    if (type === 'MultiPolygon') {
+        let sumLat = 0;
+        let sumLng = 0;
+        let count = 0;
+        for (let i = 0; i < coords.length; i++) {
+            const poly = coords[i];
+            const ring = poly[0]; // 僅取外環
+            if (ring) {
+                for (let j = 0; j < ring.length; j++) {
+                    sumLng += ring[j][0];
+                    sumLat += ring[j][1];
+                    count++;
+                }
+            }
+        }
+        if (count === 0) return null;
+        return { lat: sumLat / count, lng: sumLng / count };
+    }
+    
+    return null;
 }
 
 /**
- * 在地圖上繪製預設地標，並綁定 Popup 點擊彈窗
- * @param {Array} landmarks - 後端回傳的地標陣列
- * @param {boolean} showOutside - 是否顯示範圍外的地標
+ * 在地圖上繪製 GeoJSON GIS 圖層，並進行範圍內外樣式套用與相交判定
+ * @param {object} geoJsonData - GeoJSON 格式資料
+ * @param {boolean} showOutside - 是否顯示範圍外的要素
+ * @param {number} centerLat - 環域中心緯度
+ * @param {number} centerLng - 環域中心經度
+ * @param {number} centerRadius - 環域半徑 (公尺)
+ * @param {function} jsHaversine - 計算距離的函數
+ * @param {function} formatDistance - 格式化距離的函數
+ * @returns {Array} 落入範圍內的 Feature 陣列
  */
-export function drawLandmarks(landmarks, showOutside) {
-    clearLandmarkMarkers();
+export function drawGisLayer(geoJsonData, showOutside, centerLat, centerLng, centerRadius, jsHaversine, formatDistance) {
+    clearGisLayer();
     
-    landmarks.forEach(landmark => {
-        const { name, category, lat, lng, description, distance, isInside } = landmark;
-        
-        // 地圖上僅繪製範圍內地標 (isInside 為 true)，範圍外地標完全不繪製，保持畫面乾淨
-        if (isInside) {
-            const markerIcon = createLandmarkIcon(isInside);
-            const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(mapInstance);
+    if (!geoJsonData || !geoJsonData.features) {
+        return [];
+    }
+    
+    const insideFeatures = [];
+    
+    const lang = getCookie('gis_lang') || 'zh';
+    const dict = translations[lang] || translations.zh;
+    
+    // 定義範圍內與範圍外的幾何樣式 (LineString, Polygon 等)
+    const styleInside = {
+        color: '#10B981',
+        weight: 3,
+        opacity: 0.8,
+        fillColor: '#10B981',
+        fillOpacity: 0.25
+    };
+    
+    const styleOutside = {
+        color: '#64748B',
+        weight: 2,
+        opacity: 0.4,
+        fillColor: '#64748B',
+        fillOpacity: 0.1
+    };
+
+    // 定義範圍內與範圍外的點圖示 (Point)
+    const markerIconInside = L.divIcon({
+        html: `<div class="import-marker-inside marker-pulse-glow" style="width: 14px; height: 14px; background-color: #10B981; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);"></div>`,
+        className: 'custom-import-marker',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+    });
+
+    const markerIconOutside = L.divIcon({
+        html: `<div class="import-marker-outside" style="width: 12px; height: 12px; background-color: #64748B; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 6px rgba(100, 116, 139, 0.4);"></div>`,
+        className: 'custom-import-marker',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+    });
+
+    gisLayerInstance = L.geoJSON(geoJsonData, {
+        filter: (feature) => {
+            const centroid = getCentroid(feature.geometry);
+            if (!centroid) return false;
             
-            const popupContent = `
+            const distance = jsHaversine(centerLat, centerLng, centroid.lat, centroid.lng);
+            const isInside = distance <= centerRadius;
+            
+            // 快取這兩個分析值到 feature 中，供後續 UI 列表直接調用，避免重複計算
+            feature.properties._distance = distance;
+            feature.properties._isInside = isInside;
+            feature.properties._centroid = centroid;
+            
+            if (isInside) {
+                insideFeatures.push(feature);
+            }
+            
+            // 如果不在範圍內，且使用者關閉了「顯示範圍外」，則過濾掉不繪製
+            if (!isInside && !showOutside) {
+                return false;
+            }
+            return true;
+        },
+        style: (feature) => {
+            return feature.properties._isInside ? styleInside : styleOutside;
+        },
+        pointToLayer: (feature, latlng) => {
+            return L.marker(latlng, {
+                icon: feature.properties._isInside ? markerIconInside : markerIconOutside
+            });
+        },
+        onEachFeature: (feature, layer) => {
+            const name = feature.properties.name || feature.properties.title || (lang === 'zh' ? '未命名要素' : (lang === 'en' ? 'Unnamed Feature' : '未命名の地物'));
+            const geomType = feature.geometry.type;
+            const distance = feature.properties._distance;
+            const isInside = feature.properties._isInside;
+            const statusLabel = isInside ? dict.map_inside : dict.map_outside;
+            const statusColor = isInside ? '#10B981' : '#64748B';
+            
+            const popupHtml = `
                 <div class="map-popup-card">
                     <h3>${name}</h3>
-                    <p>${description}</p>
-                    <span class="popup-dist">距離中心：${(distance / 1000).toFixed(2)} 公里</span>
+                    <p style="font-size:0.8rem; margin-top:2px;">${dict.map_geom_type}：${geomType}</p>
+                    <span class="popup-dist">${dict.map_dist_to_center}：${formatDistance(distance)}</span><br/>
+                    <span class="popup-status" style="color:${statusColor}; font-weight:600; font-size:0.75rem;">${statusLabel}</span>
                 </div>
             `;
-            marker.bindPopup(popupContent);
-            landmarkMarkers.push(marker);
+            layer.bindPopup(popupHtml);
             
-            // 綁定地圖 Marker 實例到物件上，供外部點擊列表聯動
-            landmark.markerInstance = marker;
+            // 綁定 Leaflet layer 實例，清單點擊時可藉此觸發 openPopup
+            feature.properties._leafletLayer = layer;
         }
-    });
+    }).addTo(mapInstance);
+    
+    return insideFeatures;
 }
 
 /**
@@ -236,6 +378,9 @@ export function drawLandmarks(landmarks, showOutside) {
  */
 export function drawImportedPoints(points, centerLat, centerLng, centerRadius, jsHaversine, formatDistance) {
     clearImportedMarkers();
+    
+    const lang = getCookie('gis_lang') || 'zh';
+    const dict = translations[lang] || translations.zh;
     
     const markerIconInside = L.divIcon({
         html: `<div class="import-marker-inside" style="width: 14px; height: 14px; background-color: #10B981; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);"></div>`,
@@ -265,15 +410,15 @@ export function drawImportedPoints(points, centerLat, centerLng, centerRadius, j
             icon: isInside ? markerIconInside : markerIconOutside
         }).addTo(mapInstance);
 
-        const statusLabel = isInside ? '範圍內 (已涵蓋)' : '範圍外 (未涵蓋)';
-        const fallbackLabel = point.fallback ? `<br/><span style="color: var(--text-muted); font-size: 0.7rem; font-style: italic;">(找不到精確門牌，已退化定位至：${point.fallback_address})</span>` : '';
+        const statusLabel = isInside ? dict.map_inside : dict.map_outside;
+        const fallbackLabel = point.fallback ? `<br/><span style="color: var(--text-muted); font-size: 0.7rem; font-style: italic;">(${dict.map_fallback_addr}：${point.fallback_address})</span>` : '';
         const statusClass = isInside ? 'inside' : 'outside';
         const popupHtml = `
             <div class="map-popup-card">
-                <h3>匯入參考地址</h3>
+                <h3>${dict.map_ref_address}</h3>
                 <p style="font-size:0.85rem; margin-top:4px;">${point.address}${fallbackLabel}</p>
-                <span class="popup-dist">距離中心：${formatDistance(distance)}</span><br/>
-                <span class="popup-status ${statusClass}">${statusLabel}</span>
+                <span class="popup-dist">${dict.map_dist_to_center}：${formatDistance(distance)}</span><br/>
+                <span class="popup-status ${statusClass}" style="color:${isInside ? '#10B981' : '#EF4444'}; font-weight:600;">${statusLabel}</span>
             </div>
         `;
         marker.bindPopup(popupHtml);

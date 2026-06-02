@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- 引入 Leaflet.js 地圖 CSS (使用 jsdelivr CDN 提升載入穩定度) -->
+    <!-- 引入 Leaflet.js 地圖 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     
     <!-- 引入 html2canvas 實現前端網頁截圖下載 -->
@@ -22,6 +22,9 @@
     
     <!-- 引入 TGOS MAP API (Lite) -->
     <script type="text/javascript" src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q==" charset="utf-8"></script>
+    
+    <!-- 引入 mapbox togeojson 用於 KML 轉 GeoJSON 支援 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mapbox/togeojson@0.16.0/togeojson.min.js"></script>
 </head>
 <body>
     <div id="app-container" class="app-layout">
@@ -30,7 +33,7 @@
             <div id="map" class="map-element"></div>
             <!-- 地圖底圖風格切換浮動面板 -->
             <div class="map-style-floating-card">
-                <span class="floating-label">🗺️ 底圖風格</span>
+                <span class="floating-label">🗺️ Style</span>
                 <select id="map-style-select" class="custom-select-floating">
                     <option value="carto-dark">極簡曜石黑</option>
                     <option value="carto-light">標準地圖淡色</option>
@@ -42,34 +45,42 @@
         <!-- 側邊控制面板 (玻璃帷幕風格) -->
         <aside id="sidebar-panel" class="control-panel">
             <div class="panel-header" style="margin-bottom: 8px;">
-                <div class="brand" style="display: flex; width: 100%; align-items: center; justify-content: space-between;">
-                    <span class="brand-text" style="font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">🌐 GIS Studio</span>
-                    <button id="download-screenshot-btn" style="margin: 0;">下載截圖 📸</button>
+                <div class="brand" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px;">
+                    <span class="brand-text" data-i18n="brand_title" style="font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">🌐 GIS Studio</span>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <select id="lang-select" class="custom-select-floating" style="padding: 2px 20px 2px 6px; font-size: 0.7rem; background-position: right 4px center; background-size: 10px; margin: 0; min-height: 0;">
+                            <option value="zh">中文</option>
+                            <option value="en">EN</option>
+                            <option value="ja">JP</option>
+                        </select>
+                        <button id="tutorial-btn" class="outline-btn" data-i18n="tutorial_btn" style="margin: 0; padding: 4px 6px; font-size: 0.7rem;">說明 📖</button>
+                        <button id="download-screenshot-btn" data-i18n="screenshot_btn" style="margin: 0; padding: 4px 6px; font-size: 0.7rem;">截圖 📸</button>
+                    </div>
                 </div>
             </div>
             
             <!-- 控制區 -->
             <section class="control-group">
                 <details class="control-card" open>
-                    <summary class="card-title" style="cursor: pointer; user-select: none;">環域中心與半徑設定</summary>
+                    <summary class="card-title" data-i18n="card_setting_title" style="cursor: pointer; user-select: none;">環域中心與半徑設定</summary>
                     
                     <!-- 核心起始點地址定位 -->
                     <div class="address-geocode-field" style="margin-top: 8px;">
-                        <label for="core-address-input" class="label">核心起始點地址</label>
+                        <label for="core-address-input" class="label" data-i18n="core_address_label">核心起始點地址</label>
                         <div class="input-with-button">
-                            <input type="text" id="core-address-input" placeholder="輸入台中市西屯區地址..." value="台中市西屯區台灣大道三段99號">
-                            <button id="geocode-btn" class="primary-btn">定位</button>
+                            <input type="text" id="core-address-input" data-i18n-placeholder="core_address_placeholder" placeholder="輸入台中市西屯區地址..." value="台中市西屯區台灣大道三段99號">
+                            <button id="geocode-btn" class="primary-btn" data-i18n="geocode_btn">定位</button>
                         </div>
                     </div>
                     
                     <!-- 中心點資訊 -->
                     <div class="coord-display">
                         <div class="coord-field">
-                            <span class="label">中心緯度</span>
+                            <span class="label" data-i18n="center_lat_label">中心緯度</span>
                             <span id="center-lat" class="val">24.1622</span>
                         </div>
                         <div class="coord-field">
-                            <span class="label">中心經度</span>
+                            <span class="label" data-i18n="center_lng_label">中心經度</span>
                             <span id="center-lng" class="val">120.6470</span>
                         </div>
                     </div>
@@ -77,9 +88,9 @@
                     <!-- 半徑調整滑桿 -->
                     <div class="slider-field">
                         <div class="slider-header">
-                            <label for="radius-slider" class="label">分析半徑</label>
+                            <label for="radius-slider" class="label" data-i18n="radius_label">分析半徑</label>
                             <span class="slider-value-container">
-                                <span id="radius-val" class="highlight">1000</span> 公尺
+                                <span id="radius-val" class="highlight">1000</span> m
                             </span>
                         </div>
                         <input type="range" id="radius-slider" min="100" max="5000" step="50" value="1000" class="custom-slider">
@@ -95,54 +106,47 @@
             <!-- 大量參考點匯入 -->
             <section class="import-group">
                 <details class="control-card" id="import-collapsible-card">
-                    <summary class="card-title" style="cursor: pointer; user-select: none;">匯入參考地址 (Batch Import)</summary>
+                    <summary class="card-title" data-i18n="card_import_title" style="cursor: pointer; user-select: none;">匯入參考地址 (Batch Import)</summary>
                     
-                    <!-- 📁 從電腦匯入檔案 (支援多種常見格式) -->
-                    <div class="import-section-title" style="margin-top: 8px;">📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)</div>
+                    <!-- 📁 從電腦匯入檔案 -->
+                    <div class="import-section-title" data-i18n="local_file_import_label" style="margin-top: 8px;">📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)</div>
                     <div class="local-file-import-box">
                         <div class="browse-file-field" style="border-top: none; padding-top: 0; margin-bottom: 6px;">
-                            <span class="label">從本機選取並載入檔案：</span>
-                            <button id="import-md-btn" class="primary-btn">瀏覽檔案 📂</button>
+                            <span class="label" data-i18n="browse_file_label">從本機選取並載入檔案：</span>
+                            <button id="import-md-btn" class="primary-btn" data-i18n="browse_file_btn">瀏覽檔案 📂</button>
                             <input type="file" id="md-file-input" accept=".md,.txt,.csv,.json" style="display: none;">
                         </div>
                     </div>
                     
                     <!-- ✍️ 手動貼入地址 -->
-                    <div class="import-section-title">✍️ 手動貼入地址</div>
+                    <div class="import-section-title" data-i18n="manual_paste_label">✍️ 手動貼入地址</div>
                     <div class="textarea-container">
-                        <textarea id="batch-address-input" class="custom-textarea" placeholder="請在此一行輸入一個地址..."></textarea>
+                        <textarea id="batch-address-input" class="custom-textarea" data-i18n-placeholder="textarea_placeholder" placeholder="請在此一行輸入一個地址..."></textarea>
                     </div>
                     <div class="import-action-buttons">
-                        <button id="import-custom-btn" class="secondary-btn" style="width: 100%;">解析並匯入貼入的地址</button>
+                        <button id="import-custom-btn" class="secondary-btn" data-i18n="import_custom_btn" style="width: 100%;">解析並匯入貼入的地址</button>
                     </div>
                     <div id="import-status-msg" class="status-msg"></div>
                     
                     <!-- Markdown 格式說明摺疊區塊 -->
                     <details class="format-help-details">
-                        <summary>💡 支援的 Markdown 匯入格式規範</summary>
-                        <div class="format-help-content">
-                            <p>本系統能自動辨識並解析 Markdown 檔案中的地址，支援以下格式：</p>
-                            <ul>
-                                <li><strong>項目清單</strong>：<code>- 台中市西屯區...</code> 或 <code>* 台中市西屯區...</code></li>
-                                <li><strong>任務列表</strong>：<code>- [ ] 台中市西屯區...</code></li>
-                                <li><strong>編號清單</strong>：<code>1. 台中市西屯區...</code></li>
-                                <li><strong>Markdown 表格</strong>：會自動拆分 <code>|</code> 欄位並過濾出包含地址的欄位。</li>
-                                <li><strong>樣式標記</strong>：會自動過濾 <code>**粗體**</code>、<code>*斜體*</code> 等符號。</li>
-                            </ul>
-                            <p class="format-help-note">⚠️ 注意：過濾後的地址字串長度需大於等於 5 個字，且須包含「市、區、路、街、號」等特徵。</p>
+                        <summary data-i18n="format_help_title">💡 支援的 Markdown 匯入格式規範</summary>
+                        <div class="format-help-content" data-i18n="format_help_content">
+                            <!-- 由 i18n 填充 -->
                         </div>
                     </details>
                     
                     <!-- 地址解析佇列進度條 -->
                     <div id="parse-progress-container" class="parse-progress-container" style="margin-top: 8px; display: none;">
                         <div class="progress-info-row">
-                            <span class="progress-label">地址解析進度</span>
+                            <span class="progress-label" data-i18n="progress_bar_title">地址解析進度</span>
                             <span id="parse-progress-val" class="progress-val">0%</span>
                         </div>
                         <div class="progress-bar-bg">
                             <div id="parse-progress-fill" class="progress-bar-fill-cyan" style="width: 0%"></div>
                         </div>
-                        <div id="parse-progress-detail" class="progress-detail">已解析 0 / 0 筆 (成功: 0, 失敗: 0)</div>
+                        <div id="parse-progress-detail" class="progress-detail"></div>
+                        <button id="stop-parse-btn" class="secondary-btn" style="margin-top: 6px; width: 100%; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop ⏹️</button>
                     </div>
                 </details>
             </section>
@@ -150,31 +154,31 @@
             <!-- 統計摘要與涵蓋率 -->
             <section class="stats-group">
                 <details class="stats-card" open>
-                    <summary class="card-title" style="cursor: pointer; user-select: none;">空間分析與涵蓋率</summary>
+                    <summary class="card-title" data-i18n="card_stats_title" style="cursor: pointer; user-select: none;">空間分析與涵蓋率</summary>
                     
                     <!-- 基礎資訊 -->
                     <div class="stats-grid" style="margin-top: 8px;">
                         <div class="stat-item">
                             <span id="stat-area" class="stat-num">3.14</span>
-                            <span class="stat-label">環域面積 (km²)</span>
+                            <span class="stat-label" data-i18n="stat_area_label">環域面積 (km²)</span>
                         </div>
                         <div class="stat-item">
                             <span id="stat-count" class="stat-num highlight-emerald">0</span>
-                            <span class="stat-label">預設地標在範圍內</span>
+                            <span class="stat-label" data-i18n="stat_count_label">涵蓋地址數量</span>
                         </div>
                     </div>
                     
                     <!-- 地址涵蓋率空間交集指標 -->
                     <div class="coverage-section" style="margin-top: 6px;">
                         <div class="coverage-header">
-                            <span class="coverage-label">參考點地址涵蓋率</span>
+                            <span class="coverage-label" data-i18n="coverage_rate_label">參考點地址涵蓋率</span>
                             <span id="import-coverage-rate" class="coverage-percentage">0%</span>
                         </div>
                         <div class="progress-bar-container">
                             <div id="import-coverage-rate-fill" class="progress-bar-fill" style="width: 0%"></div>
                         </div>
                         <div class="coverage-details" style="margin-top: 4px;">
-                            <span>涵蓋地址：<strong id="import-inside-count" class="text-emerald">0</strong> / <span id="import-total-count">0</span> 個</span>
+                            <span><span data-i18n="covered_points_label">涵蓋地址：</span><strong id="import-inside-count" class="text-emerald">0</strong> / <span id="import-total-count">0</span><span data-i18n="points_unit"> 個</span></span>
                         </div>
                     </div>
                 </details>
@@ -183,25 +187,100 @@
             <!-- 分析結果列表 -->
             <details class="control-card results-group" open style="margin-bottom: 6px;">
                 <summary class="card-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; user-select: none;">
-                    <span>預設地標分析結果</span>
+                    <span data-i18n="card_results_title">空間圖層要素分析結果</span>
                     <div class="filter-toggle" onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 4px;">
                         <input type="checkbox" id="toggle-outside" checked>
-                        <label for="toggle-outside" style="cursor: pointer;">顯示範圍外</label>
+                        <label for="toggle-outside" data-i18n="show_outside_label" style="cursor: pointer;">顯示範圍外</label>
                     </div>
                 </summary>
                 
+                <!-- 📂 匯入圖層檔案區塊 -->
+                <div class="gis-layer-import-box" style="margin-top: 6px; padding: 6px; background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <span class="label" data-i18n="gis_layer_import_title" style="font-size: 0.72rem; color: var(--text-secondary);">匯入 GIS 圖層 (.geojson, .kml)</span>
+                    <button id="import-gis-btn" class="primary-btn" data-i18n="gis_import_btn" style="padding: 4px 8px; font-size: 0.72rem; margin: 0; white-space: nowrap;">載入圖層 📂</button>
+                    <input type="file" id="gis-file-input" accept=".geojson,.json,.kml" style="display: none;">
+                </div>
+                <div id="gis-import-status" class="status-msg" style="margin-top: 4px; font-size: 0.7rem; min-height: 0;"></div>
+                
                 <div id="landmarks-list" class="landmarks-list-container" style="margin-top: 8px;">
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <p>載入地理資料中...</p>
+                    <div class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                        <p data-i18n="landmarks_empty">尚未載入自訂圖層。請點擊上方按鈕載入空間圖層檔案 (.geojson, .kml)</p>
                     </div>
                 </div>
             </details>
             
             <footer class="panel-footer" style="padding-top: 8px; margin-top: auto;">
-                <p>台中市西屯區環域分析應用程式 V2 &copy; 2026</p>
+                <p>GIS Studio Buffer Analysis V2.9 &copy; 2026</p>
             </footer>
         </aside>
+    </div>
+    
+    <!-- 整合式說明與宣告彈窗 Modal (V2.8) -->
+    <div id="tutorial-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 data-i18n="modal_title">📖 系統使用指引與宣告</h2>
+                <button id="modal-close-x" class="modal-close-x">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h3 data-i18n="modal_sec_tutorial">💡 快速新手上手教學</h3>
+                    <ul class="tutorial-steps">
+                        <li>
+                            <span class="step-num">1</span>
+                            <div data-i18n="modal_step_1">
+                                <strong>設定環域中心：</strong>在左側輸入核心地址點擊「定位」，或直接在地圖上任何位置點擊滑鼠，即可設定環域分析中心。中心點支援拖曳調整。
+                            </div>
+                        </li>
+                        <li>
+                            <span class="step-num">2</span>
+                            <div data-i18n="modal_step_2">
+                                <strong>匯入參考地址：</strong>展開「匯入參考地址 (Batch Import)」，可以透過貼入多行地址或直接瀏覽本機 CSV/JSON/MD 檔案，進行非同步批量門牌解析。
+                            </div>
+                        </li>
+                        <li>
+                            <span class="step-num">3</span>
+                            <div data-i18n="modal_step_3">
+                                <strong>載入 GIS 空間檔案：</strong>在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 <strong>GeoJSON (.geojson, .json)</strong> 或 <strong>KML (.kml)</strong> 圖層檔案。
+                            </div>
+                        </li>
+                        <li>
+                            <span class="step-num">4</span>
+                            <div data-i18n="modal_step_4">
+                                <strong>調整半徑即時分析：</strong>拖曳「分析半徑」滑桿，地圖上的點、線、面要素將會即時計算距離並改變顏色（綠色為範圍內，灰色為範圍外），右側清單將即時更新。
+                            </div>
+                        </li>
+                        <li>
+                            <span class="step-num">5</span>
+                            <div data-i18n="modal_step_5">
+                                <strong>地圖聯動與風格：</strong>點擊右側要素清單卡片可飛越 Focus 並展開氣泡泡泡；點選地圖左下角風格選單可隨時切換極簡曜石黑等三種地圖風格。
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <hr class="modal-divider">
+                
+                <div class="modal-section">
+                    <h3 data-i18n="modal_sec_declaration">🛡️ 網站服務聲明</h3>
+                    <div class="declaration-item">
+                        <strong data-i18n="modal_dec_1_title">🔒 隱私與本機安全保護</strong>
+                        <p data-i18n="modal_dec_1_desc">本工具為 100% 純前端離線沙盒運算。您匯入的任何 KML、GeoJSON 空間圖層數據與批次地址，皆完全留在您的瀏覽器本地進行質心與 Haversine 距離計算，<strong>絕不會上傳至任何外部伺服器或後端保存</strong>，確保極致的資訊安全與個人隱私。</p>
+                    </div>
+                    <div class="declaration-item">
+                        <strong data-i18n="modal_dec_2_title">🌐 地圖與定位 API 來源</strong>
+                        <p data-i18n="modal_dec_2_desc">本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民網路政部 TGOS 門牌地址定位 API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。</p>
+                    </div>
+                    <div class="declaration-item">
+                        <strong data-i18n="modal_dec_3_title">⚠️ 系統免責聲明</strong>
+                        <p data-i18n="modal_dec_3_desc">本工具提供之環域交集、涵蓋率與距離分析結果僅供參考，不具備法律與測量實質效力。實際空間交集情況，請以政府地政機關官方發布之登記或測量數據為準。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-close-btn" class="primary-btn" data-i18n="modal_close_btn" style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 600;">我瞭解了，開始使用</button>
+            </div>
+        </div>
     </div>
     
     <!-- 引入 Leaflet.js 地圖 JS (使用 jsdelivr CDN 提升載入穩定度) -->

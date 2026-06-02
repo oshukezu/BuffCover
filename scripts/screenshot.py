@@ -1,14 +1,97 @@
 import asyncio
 import os
 import shutil
+import json
 from playwright.async_api import async_playwright
 
+# 產生測試 GeoJSON 檔案
+def create_test_geojson(filepath):
+    test_data = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": "台中國家歌劇院噴水池"
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [120.6408, 24.1624]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": "朝馬綠色步道"
+                },
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [120.635, 24.160],
+                        [120.640, 24.161]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": "秋紅谷景觀生態公園"
+                },
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [120.635, 24.166],
+                            [120.639, 24.166],
+                            [120.639, 24.168],
+                            [120.635, 24.168],
+                            [120.635, 24.166]
+                        ]
+                    ]
+                }
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": "台中港旅客服務中心"
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [120.528, 24.264]
+                }
+            }
+        ]
+    }
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(test_data, f, ensure_ascii=False, indent=2)
+
 async def main():
+    geojson_filename = "test_layers.geojson"
+    create_test_geojson(geojson_filename)
+    geojson_abs_path = os.path.abspath(geojson_filename)
+    print(f"已生成測試 GeoJSON 檔案: {geojson_abs_path}")
+    
     print("啟動 Playwright 瀏覽器...")
     async with async_playwright() as p:
         # 啟動 Headless 瀏覽器
         browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page(viewport={"width": 1280, "height": 800})
+        context = await browser.new_context(viewport={"width": 1280, "height": 800})
+        # 注入 Cookie 以防止教學 Modal 自動彈出干擾測試與截圖
+        await context.add_cookies([
+            {
+                "name": "has_seen_tutorial",
+                "value": "true",
+                "domain": "127.0.0.1",
+                "path": "/"
+            },
+            {
+                "name": "gis_lang",
+                "value": "zh",
+                "domain": "127.0.0.1",
+                "path": "/"
+            }
+        ])
+        page = await context.new_page()
         
         url = "http://127.0.0.1:8000"
         print(f"導航至 {url}...")
@@ -28,13 +111,13 @@ async def main():
         print("點擊定位按鈕...")
         await page.click("#geocode-btn")
         
-        # 等待地圖中心經緯度改變為歌劇院座標附近 (24.1626)
+        # 等待地圖中心經緯度改變為歌劇院座標附近 (24.162)
         print("等待定位完成...")
         await page.wait_for_function(
             "document.getElementById('center-lat').textContent.includes('24.162')"
         )
         print("中心點已成功定位至國家歌劇院！")
-
+        
         # 3. 模擬「匯入參考地址 (Batch Import)」輸入 3 個測試地址
         test_addresses = [
             "台中市西屯區河南路二段301巷77號",  # 距離歌劇院約 1.3 公里
@@ -57,13 +140,25 @@ async def main():
             "document.getElementById('import-total-count').textContent === '3'"
         )
         print("3 個參考地址解析匯入成功！")
-
-        # 4. 模擬拉動滑桿 (Slider) 調整環域半徑至 2000m
-        # 在 1000m 半徑下，只有河南路地址 (1.3km) 能在 2000m 時被涵蓋，其他兩個 (3.2km, 3.6km) 依然在範圍外。
-        # 故涵蓋率應會變為 1 / 3 = 33.3%
+        
+        # 4. 模擬載入自訂 GIS 圖層
+        print("模擬上傳 GIS 圖層 GeoJSON 檔案...")
+        file_input = await page.query_selector("#gis-file-input")
+        await file_input.set_input_files(geojson_abs_path)
+        
+        # 等待 GIS 載入完成狀態
+        print("等待 GIS 檔案載入與分析完成...")
+        await page.wait_for_function(
+            "document.getElementById('gis-import-status').textContent.includes('成功載入')"
+        )
+        
+        # 5. 模擬拉動滑桿 (Slider) 調整環域半徑至 2000m
+        # 在 2000m 半徑下，河南路地址（1.3km）落入，故參考點涵蓋率為 1/3 = 33.3%
+        # 自訂 GIS 要素中，歌劇院噴水池、朝馬步道、秋紅谷（3個）在 2000m 範圍內，台中港在範圍外。
+        # 故涵蓋地址數量應為 3
         print("調整分析半徑滑桿至 2000 公尺...")
         slider = await page.query_selector("#radius-slider")
-        await slider.evaluate("el => { el.value = 2000; el.dispatchEvent(new Event('input')); el.dispatchEvent(new Event('change')); }")
+        await slider.evaluate("el => { el.value = 2000; el.dispatchEvent(new Event('input')); }")
         
         # 等待網頁數值更新
         await page.wait_for_function(
@@ -72,9 +167,12 @@ async def main():
         await page.wait_for_function(
             "document.getElementById('import-coverage-rate').textContent === '33.3%'"
         )
-        print("半徑已調整至 2000m，地址涵蓋率已更新為 33.3%！")
+        await page.wait_for_function(
+            "document.getElementById('stat-count').textContent === '3'"
+        )
+        print("半徑已調整至 2000m，參考點涵蓋率為 33.3%，GIS 圖層要素涵蓋數量為 3！")
         
-        # 4.5 切換地圖底圖風格為極簡曜石黑，以獲得最乾淨的截圖
+        # 6. 切換地圖底圖風格為極簡曜石黑，以獲得最乾淨的截圖
         print("切換地圖風格至極簡曜石黑 (CartoDB)...")
         await page.select_option("#map-style-select", "carto-dark")
         await page.evaluate("document.getElementById('map-style-select').dispatchEvent(new Event('change'))")
@@ -86,9 +184,9 @@ async def main():
         # 額外等待 3 秒讓地圖動畫與曜石黑圖磚完全就緒
         await asyncio.sleep(3)
         
-        # 5. 拍攝截圖
+        # 7. 拍攝截圖
         local_screenshot_path = "screenshot.png"
-        artifact_dir = "/Users/oshukezu/.gemini/antigravity-ide/brain/2b237918-6004-465c-97e7-1e48764213ce"
+        artifact_dir = "/Users/oshukezu/.gemini/antigravity-ide/brain/287e4260-b049-448f-93a4-a200b756b0c1"
         artifact_screenshot_path = os.path.join(artifact_dir, "screenshot.png")
         
         print("拍攝網頁截圖...")
@@ -103,7 +201,14 @@ async def main():
             print("警告: 找不到 Artifact 目錄，未複製截圖。")
             
         await browser.close()
-        print("瀏覽器已關閉。V2 升級測試與截圖流程完成！")
+        print("瀏覽器已關閉。V2.7 升級測試與截圖流程完成！")
+        
+        # 移除暫存 of GeoJSON 檔
+        try:
+            os.remove(geojson_abs_path)
+            print("已清理測試 GeoJSON 檔案。")
+        except Exception as ex:
+            print(f"清理測試檔案失敗: {ex}")
 
 if __name__ == "__main__":
     asyncio.run(main())
