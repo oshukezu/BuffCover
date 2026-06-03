@@ -1,12 +1,9 @@
-# BuffCover - 空間環域分析與涵蓋率工具 / Spatial Buffer Coverage & Analysis Tool
-
+# BuffCover
 ---
-
-## 🌐 目錄 / Table of Contents / 目次
+## 🌐 Language
 - [繁體中文說明](#-繁體中文說明)
 - [English Documentation](#-english-documentation)
 - [日本語ドキュメント](#-日本語ドキュメント)
-
 ---
 
 ## 🇹🇼 繁體中文說明
