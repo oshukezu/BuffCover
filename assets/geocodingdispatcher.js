@@ -12,16 +12,18 @@ function cleanAddress(rawAddress) {
 
     // 關鍵減重：利用正規表達式，直接砍掉「樓、室、之幾」後面的無效干擾字串
     // 例如："台中市西屯區台灣大道三段99號5樓之3" -> "台中市西屯區台灣大道三段99號"
-    const match = address.match(/(.*?[路街坡巷弄號]))/);
+    const match = address.match(/(.*?[路街坡巷弄號])/);
     return match ? match[1] : address;
 }
 
 /**
  * 3. 核心調度主指令：雙層快取 + 異步並發控制
- * @param {Array} addressList - 診所匯出的原始地址陣列
- * @param {Function} tgosApiCall - 你原本串接 TGOS / Nominatim 的 Fetch 函式
+ * @param {Array} addressList - 原始地址物件陣列，例如 [{ address: "..." }]
+ * @param {Function} tgosApiCall - 前端單一地址定位 Fetch 函式
+ * @param {Function} onItemProcessed - 每筆地址解析完成的回呼函式 (item, coordinate) => {}
+ * @param {Function} isAbortedFn - 檢查是否手動中斷解析的函式 () => boolean
  */
-async function antigravityGeocodeDispatcher(addressList, tgosApiCall) {
+async function antigravityGeocodeDispatcher(addressList, tgosApiCall, onItemProcessed, isAbortedFn) {
     const results = [];
     const db = await initIndexedDB(); // 初始化地端 IndexedDB
     
@@ -31,6 +33,10 @@ async function antigravityGeocodeDispatcher(addressList, tgosApiCall) {
     
     async function worker() {
         while (queue.length > 0) {
+            // 檢查是否已手動中斷
+            if (isAbortedFn && isAbortedFn()) {
+                break;
+            }
             const item = queue.shift();
             if (!item) continue;
             
@@ -48,7 +54,7 @@ async function antigravityGeocodeDispatcher(addressList, tgosApiCall) {
                     // 兩層都沒命中，才真正發送網路請求 (加上冷卻時間防封鎖)
                     try {
                         await new Promise(resolve => setTimeout(resolve, 200)); // 200ms 冷卻
-                        coordinate = await tgosApiCall(cleaned); 
+                        coordinate = await tgosApiCall(item.address); 
                         
                         if (coordinate) {
                             // 解析成功，立刻寫入雙層快取，下次直接秒殺
@@ -64,7 +70,13 @@ async function antigravityGeocodeDispatcher(addressList, tgosApiCall) {
                 }
             }
 
-            results.push({ ...item, cleanedAddress: cleaned, coordinate });
+            const resultItem = { ...item, cleanedAddress: cleaned, coordinate };
+            results.push(resultItem);
+
+            // 觸發每筆處理完成的回呼，以即時更新 UI 與點位
+            if (onItemProcessed) {
+                onItemProcessed(item, coordinate);
+            }
         }
     }
 
@@ -98,3 +110,6 @@ function saveToIndexedDB(db, address, coord) {
         tx.oncomplete = () => resolve();
     });
 }
+
+// 匯出調度器以供 ES Module 引用
+export { antigravityGeocodeDispatcher, cleanAddress };

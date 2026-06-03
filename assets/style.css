@@ -729,6 +729,14 @@ details[open] > summary .card-title::before {
     flex-direction: column;
 }
 
+.core-address-label {
+    color: var(--accent-emerald) !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    display: inline-block;
+}
+
 .input-with-button {
     display: flex;
     gap: 8px;

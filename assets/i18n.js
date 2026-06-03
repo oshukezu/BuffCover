@@ -3,9 +3,15 @@
 export const translations = {
     zh: {
         brand_title: "BuffCover",
-        tutorial_btn: "說明 📖",
-        screenshot_btn: "截圖 📸",
+        tutorial_btn: "說明",
+        screenshot_btn: "截圖",
         feedback_link: "問題與意見回饋 💬",
+        
+        // 地圖風格
+        style_label: "地圖風格",
+        style_dark: "極簡曜石黑",
+        style_light_carto: "標準地圖淡色",
+        style_light_osm: "標準地圖原色",
         
         // 卡片 1 (設定)
         card_setting_title: "環域中心與半徑設定",
@@ -20,7 +26,7 @@ export const translations = {
         card_import_title: "匯入參考地址",
         local_file_import_label: "📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)",
         browse_file_label: "從本機選取並載入檔案：",
-        browse_file_btn: "瀏覽檔案 📂",
+        browse_file_btn: "瀏覽檔案",
         manual_paste_label: "✍️ 手動貼入地址",
         textarea_placeholder: "請在此一行輸入一個地址...",
         import_custom_btn: "解析並匯入貼入的地址",
@@ -48,7 +54,7 @@ export const translations = {
         card_results_title: "其他圖層參考",
         show_outside_label: "顯示範圍外",
         gis_layer_import_title: "匯入 GIS 圖層 (.geojson, .kml)",
-        gis_import_btn: "載入圖層 📂",
+        gis_import_btn: "載入圖層",
         landmarks_empty: "尚未載入自訂圖層。請點擊上方按鈕載入空間圖層檔案 (.geojson, .kml)",
         landmarks_no_features: "在當前篩選條件下無任何空間要素。",
         
@@ -82,7 +88,7 @@ export const translations = {
         
         status_parsing_aborted: "解析已由使用者中斷。",
         
-        fail_reason_btn: "失敗原因 ❓",
+        fail_reason_btn: "失敗原因",
         fail_modal_title: "❓ 地址解析失敗可能原因",
         fail_modal_desc: "在進行批量門牌地址解析時，若出現解析失敗，可能為以下常見原因所致：",
         fail_reason_1_title: "門牌歷史變更或過舊",
@@ -96,10 +102,16 @@ export const translations = {
         fail_modal_close: "關閉"
     },
     en: {
-        brand_title: "🌐 BuffCover",
-        tutorial_btn: "Guide 📖",
-        screenshot_btn: "Capture 📸",
+        brand_title: "BuffCover",
+        tutorial_btn: "Guide",
+        screenshot_btn: "Capture",
         feedback_link: "Feedback & Issues 💬",
+        
+        // Map Styles
+        style_label: "Style",
+        style_dark: "Minimalist Dark",
+        style_light_carto: "Standard Light (Carto)",
+        style_light_osm: "Standard Light (OSM)",
         
         // Card 1
         card_setting_title: "Buffer Center & Radius",
@@ -114,7 +126,7 @@ export const translations = {
         card_import_title: "Batch Import Addresses",
         local_file_import_label: "📁 Import from Computer (.md, .txt, .csv, .json)",
         browse_file_label: "Select file from local computer:",
-        browse_file_btn: "Browse File 📂",
+        browse_file_btn: "Browse File",
         manual_paste_label: "✍️ Paste Addresses Manually",
         textarea_placeholder: "Enter one address per line...",
         import_custom_btn: "Parse & Import Addresses",
@@ -142,7 +154,7 @@ export const translations = {
         card_results_title: "Other Reference Layers",
         show_outside_label: "Show Outside",
         gis_layer_import_title: "Import GIS Layer (.geojson, .kml)",
-        gis_import_btn: "Load Layer 📂",
+        gis_import_btn: "Load Layer",
         landmarks_empty: "No custom layer loaded. Click above to load a .geojson or .kml file.",
         landmarks_no_features: "No spatial features found under current filters.",
         
@@ -176,7 +188,7 @@ export const translations = {
         
         status_parsing_aborted: "Parsing has been cancelled by user.",
         
-        fail_reason_btn: "Fail Reason ❓",
+        fail_reason_btn: "Fail Reason",
         fail_modal_title: "❓ Possible Geocoding Failures",
         fail_modal_desc: "If address geocoding fails during batch import, it might be due to the following reasons:",
         fail_reason_1_title: "Historic or Outdated Doorplate",
@@ -190,10 +202,16 @@ export const translations = {
         fail_modal_close: "Close"
     },
     ja: {
-        brand_title: "🌐 BuffCover",
-        tutorial_btn: "ガイド 📖",
-        screenshot_btn: "スクショ 📸",
+        brand_title: "BuffCover",
+        tutorial_btn: "ガイド",
+        screenshot_btn: "スクショ",
         feedback_link: "フィードバック・不具合報告 💬",
+        
+        // Map Styles
+        style_label: "マップスタイル",
+        style_dark: "ミニマリスト・ダーク",
+        style_light_carto: "標準マップ (ライト色)",
+        style_light_osm: "標準マップ (原色)",
         
         // Card 1
         card_setting_title: "バッファ中心と半径設定",
@@ -208,7 +226,7 @@ export const translations = {
         card_import_title: "参照住所の一括インポート",
         local_file_import_label: "📁 パソコンからファイルをインポート (対応 .md, .txt, .csv, .json)",
         browse_file_label: "ローカルからファイルを選択:",
-        browse_file_btn: "ファイルを参照 📂",
+        browse_file_btn: "ファイルを参照",
         manual_paste_label: "✍️ 住所を手動で貼り付け",
         textarea_placeholder: "1行に1つの住所を入力してください...",
         import_custom_btn: "住所を解析してインポート",
@@ -236,7 +254,7 @@ export const translations = {
         card_results_title: "その他レイヤー参照",
         show_outside_label: "範囲外を表示",
         gis_layer_import_title: "GISレイヤーをインポート (.geojson, .kml)",
-        gis_import_btn: "レイヤーを読み込む 📂",
+        gis_import_btn: "レイヤーを読み込む",
         landmarks_empty: "カスタムレイヤーはまだ読み込まれていません。上のボタンをクリックして .geojson または .kml ファイルを読み込んでください。",
         landmarks_no_features: "現在のフィルター条件に一致する地物はありません。",
         
@@ -270,7 +288,7 @@ export const translations = {
         
         status_parsing_aborted: "住所の解析処理がユーザーによって中断されました。",
         
-        fail_reason_btn: "失敗の原因 ❓",
+        fail_reason_btn: "失敗の原因",
         fail_modal_title: "❓ 住所解析失敗の主な原因",
         fail_modal_desc: "住所一括インポートの解析で失敗が発生した場合、以下の原因が考えられます：",
         fail_reason_1_title: "番地の歴史的変更や古い住所",

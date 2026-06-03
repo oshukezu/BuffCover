@@ -163,6 +163,7 @@ async def main():
         await page.wait_for_function(
             "document.getElementById('radius-val').textContent === '2000'"
         )
+        
         await page.wait_for_function(
             "document.getElementById('import-coverage-rate').textContent === '33.3%'"
         )

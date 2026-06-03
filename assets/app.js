@@ -3,6 +3,7 @@ import { applyTranslations, translations } from './i18n.js';
 import { saveStoredCenter, saveStoredRadius, getStoredData, setCookie, getCookie } from './storage.js';
 import { parseMarkdownAddresses, parseImportedFile } from './parser.js';
 import { fetchGeocodeSingle } from './api.js';
+import { antigravityGeocodeDispatcher } from './geocodingdispatcher.js';
 import { 
     initMapInstance, 
     setCenterPosition, 
@@ -213,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statCountEl.textContent = insideCount; // 核心修正：涵蓋地址數量等同涵蓋地址的結果
     }
 
-    // 批次地址非同步佇列解析
+    // 批次地址非同步佇列解析 (採用並發加速調度器)
     async function queueImportAddresses(addresses) {
         if (!addresses || addresses.length === 0) {
             showStatusMsg(importStatusMsg, currentLang === 'zh' ? '無有效的匯入地址' : (currentLang === 'en' ? 'No valid import addresses' : '有効な住所がありません'), "error");
@@ -226,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         parseProgressVal.textContent = '0%';
         parseProgressDetail.textContent = currentLang === 'zh' ? `準備解析... 0 / ${addresses.length} 筆` : (currentLang === 'en' ? `Preparing... 0 / ${addresses.length}` : `解析準備中... 0 / ${addresses.length}`);
         
-        const infoMsg = currentLang === 'zh' ? `開始非同步解析 ${addresses.length} 筆地址，請稍候...` : (currentLang === 'en' ? `Starting async geocoding of ${addresses.length} addresses, please wait...` : `非同期で ${addresses.length} 件の住所を解析中、お待ちください...`);
+        const infoMsg = currentLang === 'zh' ? `開始非同步並發解析 ${addresses.length} 筆地址，請稍候...` : (currentLang === 'en' ? `Starting async concurrent geocoding of ${addresses.length} addresses, please wait...` : `非同期で ${addresses.length} 件の住所を並行解析中、お待ちください...`);
         showStatusMsg(importStatusMsg, infoMsg, "info");
         
         importedPoints = []; 
@@ -234,65 +235,77 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let successCount = 0;
         let failCount = 0;
+        let processedCount = 0;
         const total = addresses.length;
         
-        for (let i = 0; i < total; i++) {
-            const dict = translations[currentLang] || translations.zh;
-            if (isParsingAborted) {
-                parseProgressDetail.textContent = currentLang === 'zh' ? `解析已手動停止: 已處理 ${i} / ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` : (currentLang === 'en' ? `Cancelled: Processed ${i}/${total} (Success: ${successCount}, Fail: ${failCount})` : `中断: 処理済み ${i}/${total} (成功: ${successCount}, 失敗: ${failCount})`);
-                showStatusMsg(importStatusMsg, dict.status_parsing_aborted, "info");
-                setTimeout(() => {
-                    parseProgressContainer.style.display = 'none';
-                }, 5000);
-                return;
-            }
-            
-            const addr = addresses[i];
-            const pct = Math.round((i / total) * 100);
-            parseProgressFill.style.width = `${pct}%`;
-            parseProgressVal.textContent = `${pct}%`;
-            parseProgressDetail.textContent = currentLang === 'zh' ? `解析中: ${i} / ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` : (currentLang === 'en' ? `Geocoding: ${i}/${total} (Success: ${successCount}, Fail: ${failCount})` : `解析中: ${i}/${total} (成功: ${successCount}, 失敗: ${failCount})`);
-            
-            try {
-                const data = await fetchGeocodeSingle(addr);
-                if (isParsingAborted) {
-                    parseProgressDetail.textContent = currentLang === 'zh' ? `解析已手動停止: 已處理 ${i + 1} / ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` : (currentLang === 'en' ? `Cancelled: Processed ${i+1}/${total} (Success: ${successCount}, Fail: ${failCount})` : `中断: 処理済み ${i+1}/${total} (成功: ${successCount}, 失敗: ${failCount})`);
-                    showStatusMsg(importStatusMsg, dict.status_parsing_aborted, "info");
-                    setTimeout(() => {
-                        parseProgressContainer.style.display = 'none';
-                    }, 5000);
-                    return;
-                }
-                if (data.success) {
-                    successCount++;
-                    importedPoints.push({
-                        address: data.address,
-                        lat: data.lat,
-                        lng: data.lng,
-                        fallback: data.fallback || false,
-                        fallback_address: data.fallback_address || null
-                    });
-                    updateImportedPointsCoverage();
-                } else {
-                    failCount++;
-                }
-                
-                if (!data.cached) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            } catch (error) {
-                console.error(`解析地址失敗 (${addr}):`, error);
-                failCount++;
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+        const addressObjects = addresses.map(addr => ({ address: addr }));
+        
+        try {
+            await antigravityGeocodeDispatcher(
+                addressObjects,
+                async (cleanedAddr) => {
+                    return await fetchGeocodeSingle(cleanedAddr);
+                },
+                (item, data) => {
+                    processedCount++;
+                    if (isParsingAborted) return; // 若中斷則不再處理 UI 點位
+                    
+                    if (data && data.success) {
+                        successCount++;
+                        importedPoints.push({
+                            address: data.address,
+                            lat: data.lat,
+                            lng: data.lng,
+                            fallback: data.fallback || false,
+                            fallback_address: data.fallback_address || null
+                        });
+                        updateImportedPointsCoverage();
+                    } else {
+                        failCount++;
+                    }
+                    
+                    // 更新進度 UI
+                    const pct = Math.round((processedCount / total) * 100);
+                    parseProgressFill.style.width = `${pct}%`;
+                    parseProgressVal.textContent = `${pct}%`;
+                    parseProgressDetail.textContent = currentLang === 'zh' 
+                        ? `解析中: ${processedCount} / ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` 
+                        : (currentLang === 'en' 
+                            ? `Geocoding: ${processedCount}/${total} (Success: ${successCount}, Fail: ${failCount})` 
+                            : `解析中: ${processedCount}/${total} (成功: ${successCount}, 失敗: ${failCount})`);
+                },
+                () => isParsingAborted
+            );
+        } catch (err) {
+            console.error("批次地理編碼調度異常:", err);
         }
         
-        parseProgressFill.style.width = '100%';
-        parseProgressVal.textContent = '100%';
-        parseProgressDetail.textContent = currentLang === 'zh' ? `解析完成: 共 ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` : (currentLang === 'en' ? `Done: Total ${total} (Success: ${successCount}, Fail: ${failCount})` : `完了: 合計 ${total} (成功: ${successCount}, 失敗: ${failCount})`);
+        const dict = translations[currentLang] || translations.zh;
         
-        const doneMsg = currentLang === 'zh' ? `匯入完成。成功: ${successCount}，失敗: ${failCount}` : (currentLang === 'en' ? `Import finished. Success: ${successCount}, Fail: ${failCount}` : `インポート完了。成功: ${successCount}、失敗: ${failCount}`);
-        showStatusMsg(importStatusMsg, doneMsg, "info");
+        // 處理中斷與完成的結束 UI
+        if (isParsingAborted) {
+            parseProgressDetail.textContent = currentLang === 'zh' 
+                ? `解析已手動停止: 已處理 ${processedCount} / ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` 
+                : (currentLang === 'en' 
+                    ? `Cancelled: Processed ${processedCount}/${total} (Success: ${successCount}, Fail: ${failCount})` 
+                    : `中断: 処理済み ${processedCount}/${total} (成功: ${successCount}, 失敗: ${failCount})`);
+            showStatusMsg(importStatusMsg, dict.status_parsing_aborted, "info");
+        } else {
+            parseProgressFill.style.width = '100%';
+            parseProgressVal.textContent = '100%';
+            parseProgressDetail.textContent = currentLang === 'zh' 
+                ? `解析完成: 共 ${total} 筆 (成功: ${successCount}, 失敗: ${failCount})` 
+                : (currentLang === 'en' 
+                    ? `Done: Total ${total} (Success: ${successCount}, Fail: ${failCount})` 
+                    : `完了: 合計 ${total} (成功: ${successCount}, 失敗: ${failCount})`);
+            
+            const doneMsg = currentLang === 'zh' 
+                ? `匯入完成。成功: ${successCount}，失敗: ${failCount}` 
+                : (currentLang === 'en' 
+                    ? `Import finished. Success: ${successCount}, Fail: ${failCount}` 
+                    : `インポート完了。成功: ${successCount}、失敗: ${failCount}`);
+            showStatusMsg(importStatusMsg, doneMsg, "info");
+        }
         
         setTimeout(() => {
             parseProgressContainer.style.display = 'none';
