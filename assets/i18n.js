@@ -2,7 +2,7 @@
 
 export const translations = {
     zh: {
-        brand_title: "🌐 BuffCover",
+        brand_title: "BuffCover",
         tutorial_btn: "說明 📖",
         screenshot_btn: "截圖 📸",
         feedback_link: "問題與意見回饋 💬",

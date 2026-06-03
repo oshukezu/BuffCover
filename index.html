@@ -46,8 +46,19 @@
         <aside id="sidebar-panel" class="control-panel">
             <div class="panel-header" style="margin-bottom: 8px;">
                 <div class="brand" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px;">
-                    <span class="brand-text" data-i18n="brand_title" style="font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">🌐 BuffCover</span>
-                    <div style="display: flex; gap: 4px; align-items: center;">
+                    <div class="logo-group" style="display: flex; align-items: center; gap: 4px;">
+                        <!-- CSS 向量 Logo -->
+                        <div class="logo-wrapper">
+                            <div class="logo-box box-1"></div>
+                            <div class="logo-box box-2"></div>
+                            <div class="logo-box box-3">B</div>
+                        </div>
+                        <div class="logo-text-group" style="display: flex; flex-direction: column;">
+                            <span class="brand-text" data-i18n="brand_title" style="font-size: 1.15rem; font-weight: 800; line-height: 1.1; letter-spacing: 0.02em;">BuffCover</span>
+                            <span class="slogan-text" style="font-size: 0.55rem; color: var(--text-secondary); letter-spacing: 0.02em; margin-top: 2px; font-weight: 500; text-transform: uppercase;">Plot the space, track the pace</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
                         <!-- 行動端收合抽屜按鈕 -->
                         <button id="toggle-panel-btn" class="outline-btn mobile-only-btn" style="margin: 0; padding: 4px 6px; font-size: 0.7rem; display: none;">收起 ▼</button>
                         <select id="lang-select" class="custom-select-floating" style="padding: 2px 20px 2px 6px; font-size: 0.7rem; background-position: right 4px center; background-size: 10px; margin: 0; min-height: 0;">
