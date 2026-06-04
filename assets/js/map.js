@@ -5,6 +5,7 @@ let mapInstance = null;
 let centerMarker = null;
 let bufferCircle = null;
 let gisLayerInstance = null;
+let markerClusterInstance = null; // 患者點聚合群組實例
 let importedMarkers = [];
 let currentTileLayer = null;
 
@@ -160,8 +161,21 @@ export function clearGisLayer() {
  */
 export function clearImportedMarkers() {
     if (mapInstance) {
-        importedMarkers.forEach(marker => mapInstance.removeLayer(marker));
+        // 從地圖移除各個點的 Marker
+        importedMarkers.forEach(marker => {
+            if (markerClusterInstance) {
+                markerClusterInstance.removeLayer(marker);
+            } else {
+                mapInstance.removeLayer(marker);
+            }
+        });
         importedMarkers = [];
+
+        // 移除聚合群組實例
+        if (markerClusterInstance) {
+            mapInstance.removeLayer(markerClusterInstance);
+            markerClusterInstance = null;
+        }
     }
 }
 
@@ -400,6 +414,30 @@ export function drawImportedPoints(points, centerLat, centerLng, centerRadius, j
 
     let insideCount = 0;
 
+    // 初始化 L.markerClusterGroup 實例 (開啟 chunkedLoading 與自訂外觀樣式)
+    markerClusterInstance = L.markerClusterGroup({
+        chunkedLoading: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true, // 點擊叢集時會平滑飛越與放大
+        spiderfyOnMaxZoom: true,   // 放大到極致時 spiderfy 展開
+        iconCreateFunction: function(cluster) {
+            const childCount = cluster.getChildCount();
+            let bgClass = 'cluster-small';
+            
+            if (childCount >= 500) {
+                bgClass = 'cluster-large';     // 大於等於 500 人：顯示深綠色核心圈
+            } else if (childCount >= 100) {
+                bgClass = 'cluster-medium';    // 100-500 人：顯示黃綠色圈
+            } // 少於 100 人：顯示淡綠色圈 (cluster-small)
+            
+            return L.divIcon({
+                html: `<div><span>${childCount}</span></div>`,
+                className: `marker-cluster marker-cluster-custom ${bgClass}`,
+                iconSize: L.point(40, 40)
+            });
+        }
+    });
+
     points.forEach(point => {
         const distance = jsHaversine(centerLat, centerLng, point.lat, point.lng);
         const isInside = distance <= centerRadius;
@@ -410,7 +448,7 @@ export function drawImportedPoints(points, centerLat, centerLng, centerRadius, j
 
         const marker = L.marker([point.lat, point.lng], {
             icon: isInside ? markerIconInside : markerIconOutside
-        }).addTo(mapInstance);
+        });
 
         const statusLabel = isInside ? dict.map_inside : dict.map_outside;
         const fallbackLabel = point.fallback ? `<br/><span style="color: var(--text-muted); font-size: 0.7rem; font-style: italic;">(${dict.map_fallback_addr}：${point.fallback_address})</span>` : '';
@@ -424,8 +462,14 @@ export function drawImportedPoints(points, centerLat, centerLng, centerRadius, j
             </div>
         `;
         marker.bindPopup(popupHtml);
+        
+        // 將 Marker 加入聚合群組
+        markerClusterInstance.addLayer(marker);
         importedMarkers.push(marker);
     });
+
+    // 將群組加入地圖
+    mapInstance.addLayer(markerClusterInstance);
 
     return insideCount;
 }
@@ -449,7 +493,14 @@ export function focusOnLocation(lat, lng, markerInstance) {
     if (mapInstance) {
         mapInstance.setView([lat, lng], mapInstance.getZoom() < 15 ? 15 : mapInstance.getZoom());
         if (markerInstance) {
-            markerInstance.openPopup();
+            // 若為患者聚合點，需調用 zoomToShowLayer 以免因聚合狀態無法彈出 Popup
+            if (markerClusterInstance && markerClusterInstance.hasLayer(markerInstance)) {
+                markerClusterInstance.zoomToShowLayer(markerInstance, () => {
+                    markerInstance.openPopup();
+                });
+            } else {
+                markerInstance.openPopup();
+            }
         }
         setTimeout(() => {
             mapInstance.invalidateSize();

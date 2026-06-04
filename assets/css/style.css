@@ -1583,3 +1583,59 @@ input[type="text"]:focus, .custom-textarea:focus {
         opacity: 1;
     }
 }
+
+/* ==========================================================================
+   MarkerCluster 叢集圓圈自訂發光樣式
+   ========================================================================== */
+
+.marker-cluster-custom {
+    background: transparent !important;
+    border: none !important;
+}
+
+.marker-cluster-custom div {
+    width: 36px;
+    height: 36px;
+    margin-left: 2px;
+    margin-top: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.85rem;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: var(--transition-smooth);
+}
+
+/* 少於 100 人顯示淡綠色圈 */
+.marker-cluster-custom.cluster-small div {
+    background: rgba(16, 185, 129, 0.25) !important;
+    border: 1.5px solid rgba(16, 185, 129, 0.6) !important;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;
+    color: #A7F3D0 !important;
+}
+
+/* 100-500 人顯示黃綠色圈 */
+.marker-cluster-custom.cluster-medium div {
+    background: rgba(132, 204, 22, 0.35) !important;
+    border: 1.5px solid rgba(132, 204, 22, 0.75) !important;
+    box-shadow: 0 0 16px rgba(132, 204, 22, 0.6) !important;
+    color: #ECFDF5 !important;
+}
+
+/* 大於 500 人顯示深綠色核心圈 */
+.marker-cluster-custom.cluster-large div {
+    background: rgba(4, 120, 87, 0.6) !important;
+    border: 2px solid rgba(16, 185, 129, 0.9) !important;
+    box-shadow: 0 0 24px rgba(16, 185, 129, 0.8) !important;
+    color: #ffffff !important;
+}
+
+.marker-cluster-custom:hover div {
+    transform: scale(1.1);
+}
+

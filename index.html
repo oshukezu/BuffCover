@@ -1,31 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BuffCover - 空間分析與涵蓋率工具</title>
-    <meta name="description" content="一個現代化、反應流暢的台中市西屯區地圖環域分析工具。支援地址定位、多地址批次匯入、以及滑動半徑時的即時空間涵蓋率分析。">
-    
+    <meta name="description" content="地圖環域分析工具。支援地址定位、多地址批次匯入、以及滑動半徑時的即時空間涵蓋率分析。">
+
     <!-- 引入 Google Fonts (Outfit 與 Noto Sans TC) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <!-- 引入 Leaflet.js 地圖 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- 引入 Leaflet.markercluster CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
     <!-- 引入 html2canvas 實現前端網頁截圖下載 -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    
+
     <!-- 自訂 CSS -->
     <link rel="stylesheet" href="./assets/css/style.css">
-    
+
     <!-- 引入 TGOS MAP API (Lite) -->
-    <script type="text/javascript" src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q==" charset="utf-8"></script>
-    
+    <script type="text/javascript"
+        src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q=="
+        charset="utf-8"></script>
+
     <!-- 引入 mapbox togeojson 用於 KML 轉 GeoJSON 支援 -->
     <script src="https://cdn.jsdelivr.net/npm/@mapbox/togeojson@0.16.0/togeojson.min.js"></script>
 </head>
+
 <body>
     <div id="app-container" class="app-layout">
         <!-- 地圖容器 -->
@@ -41,47 +51,59 @@
                 </select>
             </div>
         </main>
-        
+
         <!-- 側邊控制面板 (玻璃帷幕風格) -->
         <aside id="sidebar-panel" class="control-panel">
             <div class="panel-header" style="margin-bottom: 8px;">
-                <div class="brand" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px;">
+                <div class="brand"
+                    style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px;">
                     <div class="logo-group" style="display: flex; align-items: center; gap: 8px;">
                         <!-- 產品 Logo 圖片 -->
-                        <img src="./assets/images/Buffcover.jpg" alt="BuffCover Logo" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; border: 1.5px solid rgba(255, 255, 255, 0.15);">
+                        <img src="./assets/images/Buffcover.jpg" alt="BuffCover Logo"
+                            style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; border: 1.5px solid rgba(255, 255, 255, 0.15);">
                         <div class="logo-text-group" style="display: flex; flex-direction: column;">
-                            <span class="brand-text" data-i18n="brand_title" style="font-size: 1.15rem; font-weight: 800; line-height: 1.1; letter-spacing: 0.02em;">BuffCover</span>
-                            <span class="slogan-text" style="font-size: 0.55rem; color: var(--text-secondary); letter-spacing: 0.02em; margin-top: 2px; font-weight: 500; text-transform: uppercase;">Plot the space, track the pace</span>
+                            <span class="brand-text" data-i18n="brand_title"
+                                style="font-size: 1.15rem; font-weight: 800; line-height: 1.1; letter-spacing: 0.02em;">BuffCover</span>
+                            <span class="slogan-text"
+                                style="font-size: 0.55rem; color: var(--text-secondary); letter-spacing: 0.02em; margin-top: 2px; font-weight: 500; text-transform: uppercase;">Plot
+                                the space, track the pace</span>
                         </div>
                     </div>
                     <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
                         <!-- 行動端收合抽屜按鈕 -->
-                        <button id="toggle-panel-btn" class="outline-btn mobile-only-btn" style="margin: 0; padding: 4px 6px; font-size: 0.7rem; display: none;">收起 ▼</button>
-                        <select id="lang-select" class="custom-select-floating" style="padding: 2px 20px 2px 6px; font-size: 0.7rem; background-position: right 4px center; background-size: 10px; margin: 0; min-height: 0;">
+                        <button id="toggle-panel-btn" class="outline-btn mobile-only-btn"
+                            style="margin: 0; padding: 4px 6px; font-size: 0.7rem; display: none;">收起 ▼</button>
+                        <select id="lang-select" class="custom-select-floating"
+                            style="padding: 2px 20px 2px 6px; font-size: 0.7rem; background-position: right 4px center; background-size: 10px; margin: 0; min-height: 0;">
                             <option value="zh">中文</option>
                             <option value="en">EN</option>
                             <option value="ja">JP</option>
                         </select>
-                        <button id="tutorial-btn" class="outline-btn" data-i18n="tutorial_btn" style="margin: 0; padding: 4px 6px; font-size: 0.7rem;">說明</button>
-                        <button id="download-screenshot-btn" data-i18n="screenshot_btn" style="margin: 0; padding: 4px 6px; font-size: 0.7rem;">截圖</button>
+                        <button id="tutorial-btn" class="outline-btn" data-i18n="tutorial_btn"
+                            style="margin: 0; padding: 4px 6px; font-size: 0.7rem;">說明</button>
+                        <button id="download-screenshot-btn" data-i18n="screenshot_btn"
+                            style="margin: 0; padding: 4px 6px; font-size: 0.7rem;">截圖</button>
                     </div>
                 </div>
             </div>
-            
+
             <!-- 控制區 -->
             <section class="control-group">
                 <details class="control-card" open>
-                    <summary class="card-title" data-i18n="card_setting_title" style="cursor: pointer; user-select: none;">環域中心與半徑設定</summary>
-                    
+                    <summary class="card-title" data-i18n="card_setting_title"
+                        style="cursor: pointer; user-select: none;">環域中心與半徑設定</summary>
+
                     <!-- 核心起始點地址定位 -->
                     <div class="address-geocode-field" style="margin-top: 8px;">
-                        <label for="core-address-input" class="label core-address-label" data-i18n="core_address_label">核心起始點地址</label>
+                        <label for="core-address-input" class="label core-address-label"
+                            data-i18n="core_address_label">核心起始點地址</label>
                         <div class="input-with-button">
-                            <input type="text" id="core-address-input" data-i18n-placeholder="core_address_placeholder" placeholder="請輸入地址" value="台中市西屯區台灣大道三段99號">
+                            <input type="text" id="core-address-input" data-i18n-placeholder="core_address_placeholder"
+                                placeholder="請輸入地址" value="台中市西屯區台灣大道三段99號">
                             <button id="geocode-btn" class="primary-btn" data-i18n="geocode_btn">定位</button>
                         </div>
                     </div>
-                    
+
                     <!-- 中心點資訊 -->
                     <div class="coord-display">
                         <div class="coord-field">
@@ -93,7 +115,7 @@
                             <span id="center-lng" class="val">120.6470</span>
                         </div>
                     </div>
-                    
+
                     <!-- 半徑調整滑桿 -->
                     <div class="slider-field">
                         <div class="slider-header">
@@ -102,7 +124,8 @@
                                 <span id="radius-val" class="highlight">1000</span> m
                             </span>
                         </div>
-                        <input type="range" id="radius-slider" min="100" max="5000" step="50" value="1000" class="custom-slider">
+                        <input type="range" id="radius-slider" min="100" max="5000" step="50" value="1000"
+                            class="custom-slider">
                         <div class="slider-labels">
                             <span>100m</span>
                             <span>2.5km</span>
@@ -111,44 +134,12 @@
                     </div>
                 </details>
             </section>
-            
+
             <!-- 大量參考點匯入 -->
             <section class="import-group">
-                <details class="control-card" id="import-collapsible-card" open>
-                    <summary class="card-title" data-i18n="card_import_title" style="cursor: pointer; user-select: none;">匯入參考地址</summary>
-                    
-                    <!-- 📁 從電腦匯入檔案 -->
-                    <div class="import-section-title" data-i18n="local_file_import_label" style="margin-top: 8px;">📁 從電腦匯入檔案 (支援 .md, .txt, .csv, .json)</div>
-                    <div class="local-file-import-box">
-                        <div class="browse-file-field" style="border-top: none; padding-top: 0; margin-bottom: 6px;">
-                            <span class="label" data-i18n="browse_file_label">從本機選取並載入檔案：</span>
-                            <button id="import-md-btn" class="primary-btn" data-i18n="browse_file_btn">瀏覽檔案</button>
-                            <input type="file" id="md-file-input" accept=".md,.txt,.csv,.json" style="display: none;">
-                        </div>
-                    </div>
-                    
-                    <!-- ✍️ 手動貼入地址 -->
-                    <div class="import-section-title" data-i18n="manual_paste_label">✍️ 手動貼入地址</div>
-                    <div class="textarea-container">
-                        <textarea id="batch-address-input" class="custom-textarea" data-i18n-placeholder="textarea_placeholder" placeholder="請在此一行輸入一個地址..."></textarea>
-                    </div>
-                    <div class="import-action-buttons">
-                        <button id="import-custom-btn" class="secondary-btn" data-i18n="import_custom_btn" style="width: 100%;">解析並匯入貼入的地址</button>
-                    </div>
-                    <div id="import-status-msg" class="status-msg"></div>
-                    
-                    <!-- Markdown 格式說明摺疊區塊 -->
-                    <details class="format-help-details">
-                        <summary data-i18n="format_help_title">💡 支援的 Markdown 匯入格式規範</summary>
-                        <div class="format-help-content" data-i18n="format_help_content">
-                            <!-- 由 i18n 填充 -->
-                        </div>
-                    </details>
-                    
-                </details>
-                
                 <!-- 地址解析佇列進度條 -->
-                <div id="parse-progress-container" class="parse-progress-container" style="margin-top: 8px; margin-bottom: 8px; display: none;">
+                <div id="parse-progress-container" class="parse-progress-container"
+                    style="margin-top: 8px; margin-bottom: 8px; display: none;">
                     <div class="progress-info-row">
                         <span class="progress-label" data-i18n="progress_bar_title">地址解析進度</span>
                         <span id="parse-progress-val" class="progress-val">0%</span>
@@ -158,17 +149,57 @@
                     </div>
                     <div id="parse-progress-detail" class="progress-detail"></div>
                     <div class="progress-action-row" style="display: flex; gap: 6px; margin-top: 6px;">
-                        <button id="stop-parse-btn" class="secondary-btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop</button>
-                        <button id="fail-reason-btn" class="outline-btn" data-i18n="fail_reason_btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem;">失敗原因</button>
+                        <button id="stop-parse-btn" class="secondary-btn"
+                            style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop</button>
+                        <button id="fail-reason-btn" class="outline-btn" data-i18n="fail_reason_btn"
+                            style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem;">失敗原因</button>
                     </div>
                 </div>
+
+                <details class="control-card" id="import-collapsible-card" open>
+                    <summary class="card-title" data-i18n="card_import_title"
+                        style="cursor: pointer; user-select: none;">匯入參考地址</summary>
+
+                    <!-- 📁 從電腦匯入檔案 -->
+                    <div class="import-section-title" data-i18n="local_file_import_label" style="margin-top: 8px;">📁
+                        從電腦匯入檔案 (支援 .md, .txt, .csv, .json)</div>
+                    <div class="local-file-import-box">
+                        <div class="browse-file-field" style="border-top: none; padding-top: 0; margin-bottom: 6px;">
+                            <span class="label" data-i18n="browse_file_label">從本機選取並載入檔案：</span>
+                            <button id="import-md-btn" class="primary-btn" data-i18n="browse_file_btn">瀏覽檔案</button>
+                            <input type="file" id="md-file-input" accept=".md,.txt,.csv,.json" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- ✍️ 手動貼入地址 -->
+                    <div class="import-section-title" data-i18n="manual_paste_label">✍️ 手動貼入地址</div>
+                    <div class="textarea-container">
+                        <textarea id="batch-address-input" class="custom-textarea"
+                            data-i18n-placeholder="textarea_placeholder" placeholder="請在此一行輸入一個地址..."></textarea>
+                    </div>
+                    <div class="import-action-buttons">
+                        <button id="import-custom-btn" class="secondary-btn" data-i18n="import_custom_btn"
+                            style="width: 100%;">解析並匯入貼入的地址</button>
+                    </div>
+                    <div id="import-status-msg" class="status-msg"></div>
+
+                    <!-- Markdown 格式說明摺疊區塊 -->
+                    <details class="format-help-details">
+                        <summary data-i18n="format_help_title">💡 支援的 Markdown 匯入格式規範</summary>
+                        <div class="format-help-content" data-i18n="format_help_content">
+                            <!-- 由 i18n 填充 -->
+                        </div>
+                    </details>
+
+                </details>
             </section>
-            
+
             <!-- 統計摘要與涵蓋率 -->
             <section class="stats-group">
                 <details class="stats-card" open>
-                    <summary class="card-title" data-i18n="card_stats_title" style="cursor: pointer; user-select: none;">空間分析與涵蓋率</summary>
-                    
+                    <summary class="card-title" data-i18n="card_stats_title"
+                        style="cursor: pointer; user-select: none;">空間分析與涵蓋率</summary>
+
                     <!-- 基礎資訊 -->
                     <div class="stats-grid" style="margin-top: 8px;">
                         <div class="stat-item">
@@ -180,7 +211,7 @@
                             <span class="stat-label" data-i18n="stat_count_label">涵蓋地址數量</span>
                         </div>
                     </div>
-                    
+
                     <!-- 地址涵蓋率空間交集指標 -->
                     <div class="coverage-section" style="margin-top: 6px;">
                         <div class="coverage-header">
@@ -191,46 +222,58 @@
                             <div id="import-coverage-rate-fill" class="progress-bar-fill" style="width: 0%"></div>
                         </div>
                         <div class="coverage-details" style="margin-top: 4px;">
-                            <span><span data-i18n="covered_points_label">涵蓋地址：</span><strong id="import-inside-count" class="text-emerald">0</strong> / <span id="import-total-count">0</span><span data-i18n="points_unit"> 個</span></span>
+                            <span><span data-i18n="covered_points_label">涵蓋地址：</span><strong id="import-inside-count"
+                                    class="text-emerald">0</strong> / <span id="import-total-count">0</span><span
+                                    data-i18n="points_unit"> 個</span></span>
                         </div>
                     </div>
                 </details>
             </section>
-            
+
             <!-- 分析結果列表 -->
             <details class="control-card results-group" open style="margin-bottom: 6px;">
-                <summary style="display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; user-select: none;">
+                <summary
+                    style="display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; user-select: none;">
                     <span class="card-title" data-i18n="card_results_title">其他圖層參考</span>
-                    <div class="filter-toggle" onclick="event.stopPropagation();" style="display: flex; align-items: center; gap: 4px;">
+                    <div class="filter-toggle" onclick="event.stopPropagation();"
+                        style="display: flex; align-items: center; gap: 4px;">
                         <input type="checkbox" id="toggle-outside" checked>
-                        <label for="toggle-outside" data-i18n="show_outside_label" style="cursor: pointer;">顯示範圍外</label>
+                        <label for="toggle-outside" data-i18n="show_outside_label"
+                            style="cursor: pointer;">顯示範圍外</label>
                     </div>
                 </summary>
-                
+
                 <!-- 📂 匯入圖層檔案區塊 -->
-                <div class="gis-layer-import-box" style="margin-top: 6px; padding: 6px; background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-                    <span class="label" data-i18n="gis_layer_import_title" style="font-size: 0.72rem; color: var(--text-secondary);">匯入 GIS 圖層 (.geojson, .kml)</span>
-                    <button id="import-gis-btn" class="primary-btn" data-i18n="gis_import_btn" style="padding: 4px 8px; font-size: 0.72rem; margin: 0; white-space: nowrap;">載入圖層</button>
+                <div class="gis-layer-import-box"
+                    style="margin-top: 6px; padding: 6px; background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <span class="label" data-i18n="gis_layer_import_title"
+                        style="font-size: 0.72rem; color: var(--text-secondary);">匯入 GIS 圖層 (.geojson, .kml)</span>
+                    <button id="import-gis-btn" class="primary-btn" data-i18n="gis_import_btn"
+                        style="padding: 4px 8px; font-size: 0.72rem; margin: 0; white-space: nowrap;">載入圖層</button>
                     <input type="file" id="gis-file-input" accept=".geojson,.json,.kml" style="display: none;">
                 </div>
-                <div id="gis-import-status" class="status-msg" style="margin-top: 4px; font-size: 0.7rem; min-height: 0;"></div>
-                
+                <div id="gis-import-status" class="status-msg"
+                    style="margin-top: 4px; font-size: 0.7rem; min-height: 0;"></div>
+
                 <div id="landmarks-list" class="landmarks-list-container" style="margin-top: 8px;">
-                    <div class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+                    <div class="empty-state"
+                        style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
                         <p data-i18n="landmarks_empty">尚未載入自訂圖層。請點擊上方按鈕載入空間圖層檔案 (.geojson, .kml)</p>
                     </div>
                 </div>
             </details>
-            
+
             <footer class="panel-footer" style="padding-top: 8px; margin-top: auto;">
                 <p>BuffCover V1.0 &copy; 2026 by J.J. Wang</p>
                 <p style="margin-top: 4px; font-size: 0.65rem;">
-                    <a href="https://github.com/oshukezu" target="_blank" data-i18n="feedback_link" style="color: var(--text-muted); text-decoration: underline; transition: var(--transition-smooth);">問題與意見回饋 💬</a>
+                    <a href="https://github.com/oshukezu" target="_blank" data-i18n="feedback_link"
+                        style="color: var(--text-muted); text-decoration: underline; transition: var(--transition-smooth);">問題與意見回饋
+                        💬</a>
                 </p>
             </footer>
         </aside>
     </div>
-    
+
     <!-- 整合式說明與宣告彈窗 Modal (V2.8) -->
     <div id="tutorial-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
@@ -257,7 +300,8 @@
                         <li>
                             <span class="step-num">3</span>
                             <div data-i18n="modal_step_3">
-                                載入 GIS 空間檔案：在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 GeoJSON (.geojson, .json) 或 KML (.kml) 圖層檔案。
+                                載入 GIS 空間檔案：在右側下方「空間圖層要素分析結果」點選「載入圖層 📂」，選擇本機的 GeoJSON (.geojson, .json) 或 KML (.kml)
+                                圖層檔案。
                             </div>
                         </li>
                         <li>
@@ -274,31 +318,37 @@
                         </li>
                     </ul>
                 </div>
-                
+
                 <hr class="modal-divider">
-                
+
                 <div class="modal-section">
                     <h3 data-i18n="modal_sec_declaration">🛡️ 網站服務聲明</h3>
                     <div class="declaration-item">
                         <strong data-i18n="modal_dec_1_title">🔒 隱私與本機安全保護</strong>
-                        <p data-i18n="modal_dec_1_desc">本工具為 100% 純前端離線沙盒運算。您匯入的任何 KML、GeoJSON 空間圖層數據與批次地址，皆完全留在您的瀏覽器本地進行質心與 Haversine 距離計算，<strong>絕不會上傳至任何外部伺服器或後端保存</strong>，確保極致的資訊安全與個人隱私。</p>
+                        <p data-i18n="modal_dec_1_desc">本工具為 100% 純前端離線沙盒運算。您匯入的任何 KML、GeoJSON
+                            空間圖層數據與批次地址，皆完全留在您的瀏覽器本地進行質心與 Haversine
+                            距離計算，<strong>絕不會上傳至任何外部伺服器或後端保存</strong>，確保極致的資訊安全與個人隱私。</p>
                     </div>
                     <div class="declaration-item">
                         <strong data-i18n="modal_dec_2_title">🌐 地圖與定位 API 來源</strong>
-                        <p data-i18n="modal_dec_2_desc">本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民國內政部 TGOS 門牌地址定位 API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。（*請注意：TGOS 地址定位服務僅限台灣地區，海外之門牌地址暫不適用。）</p>
+                        <p data-i18n="modal_dec_2_desc">本系統地圖底圖採用 OpenStreetMap 數據，地理編碼（門牌定位）服務介接中華民國內政部 TGOS 門牌地址定位
+                            API（Lite）以及 Nominatim 服務，自動進行 TWD97 至 WGS84 座標一致性投影反算。（*請注意：TGOS 地址定位服務僅限台灣地區，海外之門牌地址暫不適用。）
+                        </p>
                     </div>
                     <div class="declaration-item">
                         <strong data-i18n="modal_dec_3_title">⚠️ 系統免責聲明</strong>
-                        <p data-i18n="modal_dec_3_desc">本工具提供之環域交集、涵蓋率與距離分析結果僅供參考，不具備法律與測量實質效力。實際空間交集情況，請以政府地政機關官方發布之登記或測量數據為準。</p>
+                        <p data-i18n="modal_dec_3_desc">
+                            本工具提供之環域交集、涵蓋率與距離分析結果僅供參考，不具備法律與測量實質效力。實際空間交集情況，請以政府地政機關官方發布之登記或測量數據為準。</p>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="modal-close-btn" class="primary-btn" data-i18n="modal_close_btn" style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 600;">我瞭解了，開始使用</button>
+                <button id="modal-close-btn" class="primary-btn" data-i18n="modal_close_btn"
+                    style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 600;">我瞭解了，開始使用</button>
             </div>
         </div>
     </div>
-    
+
     <!-- 地址解析失敗原因說明 Modal -->
     <div id="fail-reason-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card" style="max-width: 450px;">
@@ -307,48 +357,67 @@
                 <button id="fail-modal-close-x" class="modal-close-x">&times;</button>
             </div>
             <div class="modal-body" style="font-size: 0.82rem; line-height: 1.5;">
-                <p data-i18n="fail_modal_desc" style="margin-bottom: 12px; color: var(--text-secondary);">在進行批量門牌地址解析時，若出現解析失敗，可能為以下常見原因所致：</p>
+                <p data-i18n="fail_modal_desc" style="margin-bottom: 12px; color: var(--text-secondary);">
+                    在進行批量門牌地址解析時，若出現解析失敗，可能為以下常見原因所致：</p>
                 <ul class="tutorial-steps" style="gap: 10px;">
                     <li style="align-items: flex-start; gap: 8px;">
-                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">1</span>
+                        <span class="step-num"
+                            style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">1</span>
                         <div>
-                            <strong data-i18n="fail_reason_1_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">門牌歷史變更或過舊</strong>
-                            <span data-i18n="fail_reason_1_desc" style="color: var(--text-secondary);">地址可能為舊式門牌或已因行政區重劃、道路更名而失效，導致定位系統無法匹配最新資料。</span>
+                            <strong data-i18n="fail_reason_1_title"
+                                style="color: var(--text-primary); display: block; margin-bottom: 2px;">門牌歷史變更或過舊</strong>
+                            <span data-i18n="fail_reason_1_desc"
+                                style="color: var(--text-secondary);">地址可能為舊式門牌或已因行政區重劃、道路更名而失效，導致定位系統無法匹配最新資料。</span>
                         </div>
                     </li>
                     <li style="align-items: flex-start; gap: 8px;">
-                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">2</span>
+                        <span class="step-num"
+                            style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">2</span>
                         <div>
-                            <strong data-i18n="fail_reason_2_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">地址書寫格式錯誤</strong>
-                            <span data-i18n="fail_reason_2_desc" style="color: var(--text-secondary);">地址字串中含有過多贅字、錯別字，或遺漏了關鍵的縣市名稱，或寫法不合常規（如「五段」寫成「5段」等）。</span>
+                            <strong data-i18n="fail_reason_2_title"
+                                style="color: var(--text-primary); display: block; margin-bottom: 2px;">地址書寫格式錯誤</strong>
+                            <span data-i18n="fail_reason_2_desc"
+                                style="color: var(--text-secondary);">地址字串中含有過多贅字、錯別字，或遺漏了關鍵的縣市名稱，或寫法不合常規（如「五段」寫成「5段」等）。</span>
                         </div>
                     </li>
                     <li style="align-items: flex-start; gap: 8px;">
-                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">3</span>
+                        <span class="step-num"
+                            style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">3</span>
                         <div>
-                            <strong data-i18n="fail_reason_3_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">定位 API 服務限制</strong>
-                            <span data-i18n="fail_reason_3_desc" style="color: var(--text-secondary);">TGOS 地址編碼服務主要僅限解析「台灣地區」之門牌，海外地區地址、非標準建物名、或虛擬地標無法直接以此服務轉換。</span>
+                            <strong data-i18n="fail_reason_3_title"
+                                style="color: var(--text-primary); display: block; margin-bottom: 2px;">定位 API
+                                服務限制</strong>
+                            <span data-i18n="fail_reason_3_desc" style="color: var(--text-secondary);">TGOS
+                                地址編碼服務主要僅限解析「台灣地區」之門牌，海外地區地址、非標準建物名、或虛擬地標無法直接以此服務轉換。</span>
                         </div>
                     </li>
                     <li style="align-items: flex-start; gap: 8px;">
-                        <span class="step-num" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">4</span>
+                        <span class="step-num"
+                            style="background: rgba(239, 68, 68, 0.2); color: #F87171; border-color: rgba(239, 68, 68, 0.4);">4</span>
                         <div>
-                            <strong data-i18n="fail_reason_4_title" style="color: var(--text-primary); display: block; margin-bottom: 2px;">網路請求速率限制</strong>
-                            <span data-i18n="fail_reason_4_desc" style="color: var(--text-secondary);">為了遵守 Nominatim 與定位服務的請求防護限制，批次解析非快取地址時有冷卻時間，請求過快可能觸發限流。</span>
+                            <strong data-i18n="fail_reason_4_title"
+                                style="color: var(--text-primary); display: block; margin-bottom: 2px;">網路請求速率限制</strong>
+                            <span data-i18n="fail_reason_4_desc" style="color: var(--text-secondary);">為了遵守 Nominatim
+                                與定位服務的請求防護限制，批次解析非快取地址時有冷卻時間，請求過快可能觸發限流。</span>
                         </div>
                     </li>
                 </ul>
             </div>
             <div class="modal-footer" style="padding-top: 10px;">
-                <button id="fail-modal-close-btn" class="primary-btn" data-i18n="fail_modal_close" style="width: 100%; padding: 10px; font-size: 0.85rem; font-weight: 600;">關閉</button>
+                <button id="fail-modal-close-btn" class="primary-btn" data-i18n="fail_modal_close"
+                    style="width: 100%; padding: 10px; font-size: 0.85rem; font-weight: 600;">關閉</button>
             </div>
         </div>
     </div>
-    
+
     <!-- 引入 Leaflet.js 地圖 JS (使用 jsdelivr CDN 提升載入穩定度) -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- 引入 Leaflet.markercluster JS -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
     <!-- 自訂 JS -->
     <script type="module" src="./assets/js/app.js"></script>
 </body>
+
 </html>
