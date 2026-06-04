@@ -37,16 +37,19 @@ BuffCover/
 ├── scripts/
 │   └── screenshot.py      # 自動化測試與網頁截圖腳本 (基於 Playwright)
 └── assets/                # 前端靜態資源目錄
-    ├── Buffcover.jpg      # 複製之 Logo 圖片 (供前端直接引用)
     ├── index.html         # 網頁結構檔案 (引入 Leaflet CDN 與前端模組)
-    ├── style.css          # CSS 樣式表 (包含發光動畫、自訂折疊箭頭與翡翠綠標籤)
-    ├── app.js             # 前端控制主邏輯 (處理 DOM 事件與流程控制)
-    ├── config.js          # 全域配置常數 (預設座標與地標清單)
-    ├── storage.js         # 本地 localStorage 快取管理 (記住環域半徑與中心點)
-    ├── parser.js          # Markdown 檔案解析器 (正規表達式地址智慧提取)
-    ├── api.js             # 後端 API 與前端 Fallback 退化定位模組
-    ├── map.js             # Leaflet 地圖操作與向量要素 (GeoJSON, KML) 渲染模組
-    └── geocodingdispatcher.js # 核心調度器 (IndexedDB 雙層快取與併發 3 限制)
+    ├── css/               # 樣式表目錄
+    │   └── style.css      # CSS 樣式表 (包含發光動畫、自訂折疊箭頭與翡翠綠標籤)
+    ├── images/            # 圖片資源目錄
+    │   └── Buffcover.jpg  # 複製之 Logo 圖片 (供前端直接引用)
+    └── js/                # JavaScript 程式碼目錄
+        ├── app.js         # 前端控制主邏輯 (處理 DOM 事件與流程控制)
+        ├── config.js      # 全域配置常數 (預設座標與地標清單)
+        ├── storage.js     # 本地 localStorage 快取管理 (記住環域半徑與中心點)
+        ├── parser.js      # Markdown 檔案解析器 (正規表達式地址智慧提取)
+        ├── api.js         # 後端 API 與前端 Fallback 退化定位模組
+        ├── map.js         # Leaflet 地圖操作與向量要素 (GeoJSON, KML) 渲染模組
+        └── geocodingdispatcher.js # 核心調度器 (IndexedDB 雙層快取與併發 3 限制)
 ```
 
 ### 4. 核心功能特點
@@ -93,16 +96,19 @@ BuffCover/
 ├── scripts/
 │   └── screenshot.py      # E2E Playwright test script
 └── assets/                # Static assets directory
-    ├── Buffcover.jpg      # Copied logo image for frontend loading
     ├── index.html         # Main page HTML structures
-    ├── style.css          # CSS styles (animations, custom details arrows)
-    ├── app.js             # Main frontend app controller
-    ├── config.js          # App configurations (defaults and backup landmarks)
-    ├── storage.js         # LocalStorage cookies helper
-    ├── parser.js          # Markdown list/table address text parser
-    ├── api.js             # API communications wrapper
-    ├── map.js             # Leaflet operations and GeoJSON/KML rendering
-    └── geocodingdispatcher.js # Concurrent geocoding pool & IndexedDB cache
+    ├── css/               # CSS stylesheet directory
+    │   └── style.css      # CSS styles (animations, custom details arrows)
+    ├── images/            # Image assets directory
+    │   └── Buffcover.jpg  # Copied logo image for frontend loading
+    └── js/                # JavaScript source files directory
+        ├── app.js         # Main frontend app controller
+        ├── config.js      # App configurations (defaults and backup landmarks)
+        ├── storage.js     # LocalStorage cookies helper
+        ├── parser.js      # Markdown list/table address text parser
+        ├── api.js         # API communications wrapper
+        ├── map.js         # Leaflet operations and GeoJSON/KML rendering
+        └── geocodingdispatcher.js # Concurrent geocoding pool & IndexedDB cache
 ```
 
 ### 4. Core Capabilities
@@ -149,16 +155,19 @@ BuffCover/
 ├── scripts/
 │   └── screenshot.py      # E2Eテストおよび自動スクリーンショット (Playwright)
 └── assets/                # フロントエンド静的アセット
-    ├── Buffcover.jpg      # 表示用ロゴ画像
     ├── index.html         # メインHTML
-    ├── style.css          # CSSスタイルシート (アニメーション、アコーディオン矢印)
-    ├── app.js             # アプリのメイン制御ロジック
-    ├── config.js          # 設定値 (既定座標およびバックアップ目標)
-    ├── storage.js         # ローカルストレージおよびクッキー管理
-    ├── parser.js          # Markdown・テキスト住所自動抽出パーサー
-    ├── api.js             # バックエンドAPI接続およびフォールバック制御
-    ├── map.js             # Leaflet地図操作およびGeoJSON/KMLデータ描画
-    └── geocodingdispatcher.js # 并行ジオコーディング制御とIndexedDB
+    ├── css/               # CSSスタイルシートディレクトリ
+    │   └── style.css      # CSSスタイルシート (アニメーション、アコーディオン矢印)
+    ├── images/            # 画像アセットディレクトリ
+    │   └── Buffcover.jpg  # 表示用ロゴ画像
+    └── js/                # JavaScriptコードディレクトリ
+        ├── app.js         # アプリのメイン制御ロジック
+        ├── config.js      # 設定値 (既定座標およびバックアップ目標)
+        ├── storage.js     # ローカルストレージおよびクッキー管理
+        ├── parser.js      # Markdown・テキスト住所自動抽出パーサー
+        ├── api.js         # バックエンドAPI接続およびフォールバック制御
+        ├── map.js         # Leaflet地図操作およびGeoJSON/KMLデータ描画
+        └── geocodingdispatcher.js # 并行ジオコーディング制御とIndexedDB
 ```
 
 ### 4. 核心機能

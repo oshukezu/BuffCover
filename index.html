@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     
     <!-- 自訂 CSS -->
-    <link rel="stylesheet" href="./assets/style.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
     
     <!-- 引入 TGOS MAP API (Lite) -->
     <script type="text/javascript" src="https://api.tgos.tw/TGOS_API/tgos?ver=2&AppID=x+JLVSx85Lk=&APIKey=in8W74q0ogpcfW/STwicK8D5QwCdddJf05/7nb+OtDh8R99YN3T0LurV4xato3TpL/fOfylvJ9Wv/khZEsXEWxsBmg+GEj4AuokiNXCh14Rei21U5GtJpIkO++Mq3AguFK/ISDEWn4hMzqgrkxNe1Q==" charset="utf-8"></script>
@@ -48,7 +48,7 @@
                 <div class="brand" style="display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 6px;">
                     <div class="logo-group" style="display: flex; align-items: center; gap: 8px;">
                         <!-- 產品 Logo 圖片 -->
-                        <img src="./assets/Buffcover.jpg" alt="BuffCover Logo" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; border: 1.5px solid rgba(255, 255, 255, 0.15);">
+                        <img src="./assets/images/Buffcover.jpg" alt="BuffCover Logo" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; border: 1.5px solid rgba(255, 255, 255, 0.15);">
                         <div class="logo-text-group" style="display: flex; flex-direction: column;">
                             <span class="brand-text" data-i18n="brand_title" style="font-size: 1.15rem; font-weight: 800; line-height: 1.1; letter-spacing: 0.02em;">BuffCover</span>
                             <span class="slogan-text" style="font-size: 0.55rem; color: var(--text-secondary); letter-spacing: 0.02em; margin-top: 2px; font-weight: 500; text-transform: uppercase;">Plot the space, track the pace</span>
@@ -145,22 +145,23 @@
                         </div>
                     </details>
                     
-                    <!-- 地址解析佇列進度條 -->
-                    <div id="parse-progress-container" class="parse-progress-container" style="margin-top: 8px; display: none;">
-                        <div class="progress-info-row">
-                            <span class="progress-label" data-i18n="progress_bar_title">地址解析進度</span>
-                            <span id="parse-progress-val" class="progress-val">0%</span>
-                        </div>
-                        <div class="progress-bar-bg">
-                            <div id="parse-progress-fill" class="progress-bar-fill-cyan" style="width: 0%"></div>
-                        </div>
-                        <div id="parse-progress-detail" class="progress-detail"></div>
-                        <div class="progress-action-row" style="display: flex; gap: 6px; margin-top: 6px;">
-                            <button id="stop-parse-btn" class="secondary-btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop</button>
-                            <button id="fail-reason-btn" class="outline-btn" data-i18n="fail_reason_btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem;">失敗原因</button>
-                        </div>
-                    </div>
                 </details>
+                
+                <!-- 地址解析佇列進度條 -->
+                <div id="parse-progress-container" class="parse-progress-container" style="margin-top: 8px; margin-bottom: 8px; display: none;">
+                    <div class="progress-info-row">
+                        <span class="progress-label" data-i18n="progress_bar_title">地址解析進度</span>
+                        <span id="parse-progress-val" class="progress-val">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="parse-progress-fill" class="progress-bar-fill-cyan" style="width: 0%"></div>
+                    </div>
+                    <div id="parse-progress-detail" class="progress-detail"></div>
+                    <div class="progress-action-row" style="display: flex; gap: 6px; margin-top: 6px;">
+                        <button id="stop-parse-btn" class="secondary-btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem; background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #F87171;">Stop</button>
+                        <button id="fail-reason-btn" class="outline-btn" data-i18n="fail_reason_btn" style="flex: 1; margin: 0; padding: 4px 6px; font-size: 0.75rem;">失敗原因</button>
+                    </div>
+                </div>
             </section>
             
             <!-- 統計摘要與涵蓋率 -->
@@ -348,6 +349,6 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <!-- 自訂 JS -->
-    <script type="module" src="./assets/app.js"></script>
+    <script type="module" src="./assets/js/app.js"></script>
 </body>
 </html>
